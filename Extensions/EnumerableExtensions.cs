@@ -129,28 +129,6 @@ namespace Whaledevelop.Extensions
             return list;
         }
 
-        /// <summary>
-        /// Get random element depending on the weights of elements
-        /// </summary>
-        public static T GetWeightRandomElement<T>(this IEnumerable<(int weight, T)> self, Random random)
-        {
-            // ReSharper disable once PossibleMultipleEnumeration
-            var totalWeight = self.Sum(item => item.weight);
-            var randomWeight = random.Next(0, totalWeight);
-            // ReSharper disable once PossibleMultipleEnumeration
-            foreach (var item in self)
-            {
-                randomWeight -= item.weight;
-                if (randomWeight >= 0)
-                {
-                    continue;
-                }
-                return item.Item2;
-            }
-
-            throw new($"Can't process {nameof(GetWeightRandomElement)} for totalWeight {totalWeight} and randomWeight {randomWeight}");
-        }
-
         public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
         {
             var elements = source.ToArray();
