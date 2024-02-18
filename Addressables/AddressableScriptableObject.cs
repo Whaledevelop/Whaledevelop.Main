@@ -1,20 +1,15 @@
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Whaledevelop.Addressables
 {
     public abstract class AddressableScriptableObject : ScriptableObject, IAddressable
     {
-        [DontValidate]
-        [ReadOnly]
         [SerializeField]
         private Reference _reference;
 
         protected Reference Reference => _reference;
 
 #if UNITY_EDITOR
-        [ShowInInspector]
-        [PropertyOrder(-1000)]
         private string Guid => _reference.AssetGuid;
 #endif
 

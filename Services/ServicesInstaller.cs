@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using Whaledevelop.DiContainer;
 using Whaledevelop.Extensions;
@@ -12,9 +11,8 @@ namespace Whaledevelop.Services
     public class ServicesInstaller : SingletonScriptableObjectInstaller
     {
         [NonSerialized]
-        [ShowInInspector]
-        [HideInEditorMode]
         private List<IService> _runtimeServices = new();
+        
         [SerializeReference]
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
         private IService[] _services = Array.Empty<IService>();
