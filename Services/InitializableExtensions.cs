@@ -9,16 +9,14 @@ namespace Whaledevelop.Services
     {
         public static UniTask InitializeAsync(this IEnumerable<IInitializable> self, CancellationToken cancellationToken)
         {
-            return self
-                .Select(initializable => initializable.InitializeAsync(cancellationToken))
-                .WhenAll();
+            var tasks = self.Select(initializable => initializable.InitializeAsync(cancellationToken));
+            return UniTask.WhenAll(tasks);
         }
 
         public static UniTask ReleaseAsync(this IEnumerable<IInitializable> self, CancellationToken cancellationToken)
         {
-            return self
-                .Select(initializable => initializable.ReleaseAsync(cancellationToken))
-                .WhenAll();
+            var tasks = self.Select(initializable => initializable.ReleaseAsync(cancellationToken));
+            return UniTask.WhenAll(tasks);
         }
     }
 }
