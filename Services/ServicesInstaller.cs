@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+#if ODIN_INSPECTOR
+using Sirenix.OdinInspector;
+#endif
 using UnityEngine;
 using Whaledevelop.DiContainer;
 using Whaledevelop.Extensions;
@@ -11,6 +14,10 @@ namespace Whaledevelop.Services
     public class ServicesInstaller : SingletonScriptableObjectInstaller
     {
         [NonSerialized]
+        #if ODIN_INSPECTOR
+        [ShowInInspector]
+        [HideInEditorMode]
+        #endif
         private List<IService> _runtimeServices = new();
         
         [SerializeReference]
