@@ -41,12 +41,13 @@ namespace Whaledevelop.Services
 
             Container.Bind(_runtimeServices);
 
-            for (var i = 0; i < _runtimeServices.Count; i++)
+            foreach (var runtimeService in _runtimeServices)
             {
-                Container.TryInject(_runtimeServices[i]);
+                Container.TryInject(runtimeService);
             }
 
-            _runtimeServices.InitializeAsync(Application.exitCancellationToken).Forget();
+            var tasks = _runtimeServices.Select(initializable => initializable.InitializeAsync(Application.exitCancellationToken));
+            UniTask.WhenAll(tasks).Forget();
         }
     }
 }

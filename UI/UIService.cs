@@ -39,7 +39,7 @@ namespace Whaledevelop.UI
         {
             if (_views.ContainsKey(viewModel))
             {
-                Log.Info("View already opened");
+                Debug.Log("View already opened");
                 return;
             }
             var viewInstance = Object.Instantiate(viewPrefab, _canvasRectTransform);
@@ -53,7 +53,7 @@ namespace Whaledevelop.UI
         {
             if (!_views.TryGetValue(viewModel, out var viewInstance))
             {
-                Log.Info("No view instance");
+                Debug.Log("No view instance");
                 return;
             }
             viewInstance.Release();

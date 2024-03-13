@@ -29,7 +29,8 @@ namespace Whaledevelop.Services
         {
             await OnReleaseAsync(cancellationToken);
 
-            _cancellationTokenSource.CancelAndDispose();
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
             _cancellationTokenSource = null;
 
             _initialized = false;
