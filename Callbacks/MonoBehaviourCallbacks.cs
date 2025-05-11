@@ -7,6 +7,10 @@ namespace Whaledevelop
     {
         public event Action OnUpdate;
         
+        public event Action OnLateUpdate;
+        
+        public event Action OnFixedUpdate;
+        
         public event Action OnApplicationQuitEvent;
 
         public event Action OnDrawGizmosEvent;
@@ -15,7 +19,17 @@ namespace Whaledevelop
         {
             OnUpdate?.Invoke();
         }
-        
+
+        private void LateUpdate()
+        {
+            OnLateUpdate?.Invoke();
+        }
+
+        private void FixedUpdate()
+        {
+            OnFixedUpdate?.Invoke();
+        }
+
         private void OnApplicationQuit()
         {
             OnApplicationQuitEvent?.Invoke();
