@@ -1,4 +1,4 @@
-namespace Whaledevelop.Services
+﻿namespace Whaledevelop.Services
 {
     public interface IService : IInitializable
     {
