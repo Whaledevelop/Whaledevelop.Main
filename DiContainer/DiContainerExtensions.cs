@@ -1,4 +1,7 @@
-﻿namespace Whaledevelop.DiContainer
+﻿using System;
+using System.Linq;
+
+namespace Whaledevelop.DiContainer
 {
     public static class DiContainerExtensions
     {
@@ -10,6 +13,15 @@
         public static void Destroy(this IDiContainer self)
         {
             ProjectContext.Instance.DestroyContainer(self);
+        }
+        
+        public static void BindToInterface<T>(this IDiContainer self, T target)
+        {
+            var type = typeof(T);
+            var interfaces = target.GetType().GetInterfaces();
+            var mainInterface = interfaces.FirstOrDefault(i =>
+                i != type && type.IsAssignableFrom(i));
+            self.Bind(mainInterface, target);
         }
 
         public static bool TryInject<T>(this IDiContainer self, T @object)

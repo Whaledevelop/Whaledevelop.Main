@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using Whaledevelop.Extensions;
 using Whaledevelop.Services;
 using Object = UnityEngine.Object;
 
 namespace Whaledevelop.UI
 {
-    [Serializable]
-    public class UIService : Service, IUIService
+    [CreateAssetMenu(menuName = "Services/UIService", fileName = "UIService")]
+    public class UIService : ServiceScriptableObject, IUIService
     {
         [SerializeField]
         private GameObject _canvasPrefab;
@@ -18,46 +17,45 @@ namespace Whaledevelop.UI
         [NonSerialized]
         private RectTransform _canvasRectTransform;
 
-        [Inject]
-        private IDiContainer _diContainer;
+        private Dictionary<IUIViewModel, UIView> _viewsModelsDict = new();
 
-        private Dictionary<IUIViewModel, UIView> _views = new();
-
-        public bool TryGetModel<T>(out T model)
-            where T : IUIViewModel
+        public bool TryGetModel<T>(out T resultModel) where T : IUIViewModel
         {
-            if (_views.TryGetFirst(keyValue => keyValue.Key is T, out var keyValuePair))
+            foreach (var (model, _) in _viewsModelsDict)
             {
-                model = (T)keyValuePair.Key;
+                if (model is not T typedModel)
+                {
+                    continue;
+                }
+                resultModel = typedModel;
                 return true;
             }
-            model = default;
+            resultModel = default;
             return false;
         }
 
         public void OpenView(UIView viewPrefab, IUIViewModel viewModel)
         {
-            if (_views.ContainsKey(viewModel))
+            if (_viewsModelsDict.ContainsKey(viewModel))
             {
                 Debug.Log("View already opened");
                 return;
             }
             var viewInstance = Object.Instantiate(viewPrefab, _canvasRectTransform);
-            _diContainer.Inject(viewInstance);
             viewInstance.Model = viewModel;
             viewInstance.Initialize();
-            _views.Add(viewModel, viewInstance);
+            _viewsModelsDict.Add(viewModel, viewInstance);
         }
 
         public void CloseView(IUIViewModel viewModel)
         {
-            if (!_views.TryGetValue(viewModel, out var viewInstance))
+            if (!_viewsModelsDict.TryGetValue(viewModel, out var viewInstance))
             {
                 Debug.Log("No view instance");
                 return;
             }
             viewInstance.Release();
-            _views.Remove(viewModel);
+            _viewsModelsDict.Remove(viewModel);
             Object.Destroy(viewInstance.gameObject);
         }
 
