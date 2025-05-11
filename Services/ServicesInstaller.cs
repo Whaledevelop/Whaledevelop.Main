@@ -7,7 +7,7 @@ using Whaledevelop.DiContainer;
 
 namespace Whaledevelop.Services
 {
-    [CreateAssetMenu(fileName = nameof(ServicesInstaller), menuName = "Installers/" + nameof(ServicesInstaller))]
+    [CreateAssetMenu(fileName = nameof(ServicesInstaller), menuName = "Whaledevelop/Installers/" + nameof(ServicesInstaller))]
     public class ServicesInstaller : SingletonScriptableObjectInstaller
     {
         [SerializeField]

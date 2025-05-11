@@ -7,7 +7,7 @@ using Whaledevelop.Services;
 
 namespace Whaledevelop.Services
 {
-    [CreateAssetMenu(menuName = "Services/GameSystemsService", fileName = "GameSystemsService")]
+    [CreateAssetMenu(menuName = "Whaledevelop/Services/GameSystemsService", fileName = "GameSystemsService")]
     public class GameSystemsService : ServiceScriptableObject, IGameSystemsService
     {
         [Inject] private IDiContainer _diContainer;

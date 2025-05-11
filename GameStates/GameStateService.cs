@@ -1,15 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using Whaledevelop.DiContainer;
 using Whaledevelop.Services;
 
 namespace Whaledevelop.GameStates
 {
-    [CreateAssetMenu(menuName = "Services/GameStateService", fileName = "GameStateService")]
+    [CreateAssetMenu(menuName = "Whaledevelop/Services/GameStateService", fileName = "GameStateService")]
     public class GameStateService : ServiceScriptableObject, IGameStateService
     {
         [Inject] private IDiContainer _diContainer;

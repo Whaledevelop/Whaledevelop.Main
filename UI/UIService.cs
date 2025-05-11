@@ -8,7 +8,7 @@ using Object = UnityEngine.Object;
 
 namespace Whaledevelop.UI
 {
-    [CreateAssetMenu(menuName = "Services/UIService", fileName = "UIService")]
+    [CreateAssetMenu(menuName = "Whaledevelop/Services/UIService", fileName = "UIService")]
     public class UIService : ServiceScriptableObject, IUIService
     {
         [SerializeField]
