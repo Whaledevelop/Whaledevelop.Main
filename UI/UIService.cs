@@ -17,7 +17,7 @@ namespace Whaledevelop.UI
         [NonSerialized]
         private RectTransform _canvasRectTransform;
 
-        private Dictionary<IUIViewModel, UIView> _viewsModelsDict = new();
+        private readonly Dictionary<IUIViewModel, UIView> _viewsModelsDict = new();
 
         public bool TryGetModel<T>(out T resultModel) where T : IUIViewModel
         {
