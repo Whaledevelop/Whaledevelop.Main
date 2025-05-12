@@ -31,7 +31,6 @@ namespace Whaledevelop.UIToolkit
             }
             uiController.Model = model;
             uiController.Initialize();
-            Debug.Log($"Open view {uiController.VisualElement}"); 
             _uiDocument.rootVisualElement.Add(uiController.VisualElement);
             _controllers.Add(uiController);
         }
