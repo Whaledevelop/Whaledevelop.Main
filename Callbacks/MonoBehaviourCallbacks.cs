@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Whaledevelop
 {
-    public class MonoBehaviourCallbacks : MonoBehaviour, IGameEventsContainer
+    public class MonoBehaviourCallbacks : MonoBehaviour, IGameCycleCallbacksContainer, IUpdateCallbacksContainer
     {
         public event Action OnUpdate;
         

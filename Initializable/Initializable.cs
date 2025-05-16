@@ -17,6 +17,11 @@ namespace Whaledevelop
 
         async UniTask IInitializable.InitializeAsync(CancellationToken cancellationToken)
         {
+            if (_initialized)
+            {
+                Debug.Log("Already Initialized");
+                return;
+            }
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Application.exitCancellationToken);
 
             await OnInitializeAsync(cancellationToken);
@@ -26,6 +31,11 @@ namespace Whaledevelop
 
         async UniTask IInitializable.ReleaseAsync(CancellationToken cancellationToken)
         {
+            if (!_initialized)
+            {
+                Debug.Log("Not initialized");
+                return;
+            }
             if (_cancellationTokenSource != null)
             {
                 _cancellationTokenSource.Cancel();
