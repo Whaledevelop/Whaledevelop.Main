@@ -33,6 +33,11 @@ namespace Whaledevelop.Reactive
 
             return new Subscription(() => _onValueChanged -= callback);
         }
+        
+        public void Unsubscribe(Action<T> callback)
+        {
+            _onValueChanged -= callback;
+        }
 
         private class Subscription : IDisposable
         {
