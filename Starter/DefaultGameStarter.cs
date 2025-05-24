@@ -7,7 +7,7 @@ using Whaledevelop.Services;
 
 namespace Whaledevelop.Starter
 {
-    public class GameStarter : MonoBehaviour
+    public class DefaultGameStarter : MonoBehaviour
     {
         [SerializeField] 
         private MainContainerContext _mainContainerContext;
