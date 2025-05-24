@@ -21,7 +21,7 @@ namespace Whaledevelop.Services
                 Container.BindToInterface<IService>(service);
                 servicesContainer.Add(service);
             }
-            Container.Bind(servicesContainer);
+            Container.BindToInterface<IServicesContainer>(servicesContainer);
         }
     }
 }

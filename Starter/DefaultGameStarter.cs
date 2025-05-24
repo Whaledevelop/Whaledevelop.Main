@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Whaledevelop.DiContainer;
 using Whaledevelop.GameStates;
 using Whaledevelop.Services;
@@ -24,7 +25,7 @@ namespace Whaledevelop.Starter
         {
             _mainContainerContext.InstallBindings();
 
-            if (_mainContainerContext.Container.TryResolve<ServicesContainer>(out var servicesContainer))
+            if (_mainContainerContext.Container.TryResolve<IServicesContainer>(out var servicesContainer))
             {
                 await servicesContainer.InitializeAsync(cancellationToken);
             }
@@ -32,9 +33,9 @@ namespace Whaledevelop.Starter
             {
                 Debug.LogError("Could not find ServicesContainer");
             }
-            if (_mainContainerContext.Container.TryResolve<IGameStateService>(out var gameStateService))
+            if (_mainContainerContext.Container.TryResolve<IGameStatesService>(out var gameStateService))
             {
-                await gameStateService.ChangeStateAsync(_startState, cancellationToken);
+                await gameStateService.SetStateAsync(_startState, cancellationToken);
             }
             else
             {

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Whaledevelop
 {
-    public abstract class InitializablesContainer<T> where T : class, IInitializable
+    public abstract class InitializablesContainer<T> : IInitializable where T : class, IInitializable
     {
         private readonly List<T> _initializables = new();
 
@@ -14,11 +14,12 @@ namespace Whaledevelop
 
         private bool _initialized;
 
+        public bool Initialized => _initialized;
         protected InitializablesContainer(IDiContainer diContainer)
         {
             _diContainer = diContainer;
         }
-
+        
         public void Add(T item)
         {
             if (!_initializables.Contains(item))
@@ -29,7 +30,7 @@ namespace Whaledevelop
 
         public async UniTask InitializeAsync(CancellationToken cancellationToken)
         {
-            if (_initialized)
+            if (Initialized)
             {
                 Debug.Log($"Container of {typeof(T)} already initialized");
                 return;

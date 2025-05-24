@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Whaledevelop
 {
-    [CreateAssetMenu(menuName = "Whaledevelop/Systems/Game Systems Config")]
+    [CreateAssetMenu(menuName = "Whaledevelop/Systems/Game Systems Config", fileName = "GameSystemsConfig")]
     public class GameSystemsConfig : ScriptableObject
     {
         [SerializeField]

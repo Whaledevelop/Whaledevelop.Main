@@ -4,10 +4,10 @@ using Whaledevelop.Services;
 
 namespace Whaledevelop.GameStates
 {
-    public interface IGameStateService : IService
+    public interface IGameStatesService : IService
     {
         IGameState CurrentState { get; }
         
-        UniTask ChangeStateAsync(IGameState state, CancellationToken cancellationToken);
+        UniTask SetStateAsync(IGameState state, CancellationToken cancellationToken);
     }
 }

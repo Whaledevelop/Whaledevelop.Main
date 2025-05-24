@@ -5,19 +5,14 @@ using Whaledevelop.Services;
 
 namespace Whaledevelop.GameStates
 {
-    [CreateAssetMenu(menuName = "Whaledevelop/Services/GameStateService", fileName = "GameStateService")]
-    public class GameStateService : ServiceScriptableObject, IGameStateService
+    [CreateAssetMenu(menuName = "Whaledevelop/Services/GameStatesService", fileName = "GameStatesService")]
+    public class GameStatesService : ServiceScriptableObject, IGameStatesService
     {
         [Inject] private IDiContainer _diContainer;
 
         public IGameState CurrentState { get; private set; }
 
-        protected override UniTask OnInitializeAsync(CancellationToken cancellationToken)
-        {
-            return UniTask.CompletedTask;
-        }
-        
-        public async UniTask ChangeStateAsync(IGameState state, CancellationToken cancellationToken)
+        public async UniTask SetStateAsync(IGameState state, CancellationToken cancellationToken)
         {
             if (CurrentState != null)
             {

@@ -38,7 +38,10 @@ namespace Whaledevelop
             _initialized = false;
         }
 
-        protected abstract UniTask OnInitializeAsync(CancellationToken cancellationToken);
+        protected virtual UniTask OnInitializeAsync(CancellationToken cancellationToken)
+        {
+            return UniTask.CompletedTask;
+        }
 
         protected virtual UniTask OnReleaseAsync(CancellationToken cancellationToken)
         {
