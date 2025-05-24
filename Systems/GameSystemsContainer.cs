@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Whaledevelop
 {
-    public class GameSystemsContainer : Initializable, IUpdatable, IFixedUpdatable, ILateUpdatable
+    public class GameSystemsContainer : Initializable, IUpdate, IFixedUpdate, ILateUpdate
     {
         [Inject]
         private IDiContainer _diContainer;
@@ -14,11 +14,11 @@ namespace Whaledevelop
         [Inject] 
         private IUpdateCallbacksContainer _updateCallbacksContainer;
 
-        private GameSystemsConfig _config;
+        private readonly GameSystemsConfig _config;
         
-        private List<IUpdatable> _updatables = new();
-        private List<IFixedUpdatable> _fixedUpdatables = new();
-        private List<ILateUpdatable> _lateUpdatables = new();
+        private readonly List<IUpdate> _updates = new();
+        private readonly List<IFixedUpdate> _fixedUpdates = new();
+        private readonly List<ILateUpdate> _lateUpdates = new();
         
         public GameSystemsContainer(GameSystemsConfig config)
         {
@@ -33,14 +33,26 @@ namespace Whaledevelop
                 await ((IInitializable)system).InitializeAsync(cancellationToken);
             }
 
-            _updatables.AddRange(_config.GetSorted<IUpdatable>());
-            _fixedUpdatables.AddRange(_config.GetSorted<IFixedUpdatable>());
-            _lateUpdatables.AddRange(_config.GetSorted<ILateUpdatable>());
+            var systemsHashSet = new HashSet<GameSystemScriptable>();
+            foreach (var system in _config.UpdateOrder)
+            {
+                system.DistributeToUpdateLists(_updates, _fixedUpdates, _lateUpdates);
+                systemsHashSet.Add(system);
+            }
+            foreach (var system in _config.GameSystems)
+            {
+                if (systemsHashSet.Contains(system))
+                {
+                    continue;
+                }
+                system.DistributeToUpdateLists(_updates, _fixedUpdates, _lateUpdates);
+            }
 
             _updateCallbacksContainer.OnUpdate += OnUpdate;
             _updateCallbacksContainer.OnFixedUpdate += OnFixedUpdate;
             _updateCallbacksContainer.OnLateUpdate += OnLateUpdate;
         }
+
 
         protected override async UniTask OnReleaseAsync(CancellationToken cancellationToken)
         {
@@ -49,9 +61,9 @@ namespace Whaledevelop
                 await ((IInitializable)system).ReleaseAsync(cancellationToken);
             }
 
-            _updatables.Clear();
-            _fixedUpdatables.Clear();
-            _lateUpdatables.Clear();
+            _updates.Clear();
+            _fixedUpdates.Clear();
+            _lateUpdates.Clear();
 
             _updateCallbacksContainer.OnUpdate -= OnUpdate;
             _updateCallbacksContainer.OnFixedUpdate -= OnFixedUpdate;
@@ -60,7 +72,7 @@ namespace Whaledevelop
 
         public void OnUpdate()
         {
-            foreach (var updatable in _updatables)
+            foreach (var updatable in _updates)
             {
                 updatable.OnUpdate();
             }
@@ -68,7 +80,7 @@ namespace Whaledevelop
 
         public void OnFixedUpdate()
         {
-            foreach (var fixedUpdatable in _fixedUpdatables)
+            foreach (var fixedUpdatable in _fixedUpdates)
             {
                 fixedUpdatable.OnFixedUpdate();
             }
@@ -76,7 +88,7 @@ namespace Whaledevelop
 
         public void OnLateUpdate()
         {
-            foreach (var lateUpdatable in _lateUpdatables)
+            foreach (var lateUpdatable in _lateUpdates)
             {
                 lateUpdatable.OnLateUpdate();
             }

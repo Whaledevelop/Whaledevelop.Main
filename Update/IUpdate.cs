@@ -1,16 +1,16 @@
 ﻿namespace Whaledevelop
 {
-    public interface IUpdatable
+    public interface IUpdate
     {
         void OnUpdate();
     }
 
-    public interface IFixedUpdatable
+    public interface IFixedUpdate
     {
         void OnFixedUpdate();
     }
 
-    public interface ILateUpdatable
+    public interface ILateUpdate
     {
         void OnLateUpdate();
     }

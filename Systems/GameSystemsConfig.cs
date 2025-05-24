@@ -32,7 +32,7 @@ namespace Whaledevelop
                     return false;
                 }
 
-                if (system is not IUpdatable && system is not IFixedUpdatable && system is not ILateUpdatable)
+                if (system is not IUpdate && system is not IFixedUpdate && system is not ILateUpdate)
                 {
                     return false;
                 }
