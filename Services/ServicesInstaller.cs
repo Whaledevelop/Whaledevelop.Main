@@ -11,7 +11,7 @@ namespace Whaledevelop.Services
     public class ServicesInstaller : SingletonScriptableObjectInstaller
     {
         [SerializeField]
-        private ServiceScriptableObject[] _services;
+        private Service[] _services;
 
         protected override void OnInstallBindings()
         {

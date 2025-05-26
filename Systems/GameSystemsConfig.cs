@@ -10,13 +10,13 @@ namespace Whaledevelop
     public class GameSystemsConfig : ScriptableObject
     {
         [SerializeField]
-        private GameSystemScriptable[] _gameSystems;
+        private GameSystem[] _gameSystems;
 
         [SerializeField, ValidateInput(nameof(ValidateInput))] 
-        private GameSystemScriptable[] _updateOrder;
+        private GameSystem[] _updateOrder;
 
-        public GameSystemScriptable[] GameSystems => _gameSystems;
-        public GameSystemScriptable[] UpdateOrder => _updateOrder;
+        public GameSystem[] GameSystems => _gameSystems;
+        public GameSystem[] UpdateOrder => _updateOrder;
 
         private bool ValidateInput()
         {
@@ -43,7 +43,7 @@ namespace Whaledevelop
         
         public IEnumerable<T> GetSorted<T>() where T : class
         {
-            var set = new HashSet<GameSystemScriptable>(_updateOrder);
+            var set = new HashSet<GameSystem>(_updateOrder);
 
             foreach (var prioritized in _updateOrder)
             {
@@ -64,6 +64,7 @@ namespace Whaledevelop
         
 #if UNITY_EDITOR
         
+        // TODO сделать окно с выбором папки
         private const string SearchPath = "Assets/_Game/Scriptables/Systems";
         
         [Button("Find Systems in Folder")]
@@ -72,11 +73,11 @@ namespace Whaledevelop
             var guids = AssetDatabase.FindAssets("t:GameSystemScriptable", new[] { SearchPath });
             var found = guids
                 .Select(AssetDatabase.GUIDToAssetPath)
-                .Select(AssetDatabase.LoadAssetAtPath<GameSystemScriptable>)
+                .Select(AssetDatabase.LoadAssetAtPath<GameSystem>)
                 .Where(x => x != null)
                 .ToList();
 
-            var current = new HashSet<GameSystemScriptable>(_gameSystems);
+            var current = new HashSet<GameSystem>(_gameSystems);
             current.UnionWith(found);
 
             _gameSystems = current.ToArray();

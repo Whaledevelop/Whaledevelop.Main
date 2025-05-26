@@ -3,10 +3,10 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Whaledevelop.Services;
 
-namespace Whaledevelop.GameStates
+namespace Whaledevelop
 {
     [CreateAssetMenu(menuName = "Whaledevelop/Services/GameStatesService", fileName = "GameStatesService")]
-    public class GameStatesService : ServiceScriptableObject, IGameStatesService
+    public class GameStatesService : Service, IGameStatesService
     {
         [Inject] private IDiContainer _diContainer;
 

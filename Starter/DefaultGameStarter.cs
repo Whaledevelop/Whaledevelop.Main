@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Whaledevelop.DiContainer;
-using Whaledevelop.GameStates;
+using Whaledevelop;
 using Whaledevelop.Services;
 
 namespace Whaledevelop.Starter
@@ -14,7 +14,7 @@ namespace Whaledevelop.Starter
         private MainContainerContext _mainContainerContext;
         
         [SerializeField]
-        private ScriptableGameState _startState;
+        private GameState _startState;
 
         private void Awake()
         {

@@ -10,7 +10,7 @@ using Whaledevelop.Services;
 namespace Whaledevelop
 {
     [CreateAssetMenu(menuName = "Whaledevelop/Services/GameSystemsService", fileName = "GameSystemsService")]
-    public class GameSystemsService : ServiceScriptableObject, IGameSystemsService, IUpdate, IFixedUpdate, ILateUpdate
+    public class GameSystemsService : Service, IGameSystemsService, IUpdate, IFixedUpdate, ILateUpdate
     {
         [SerializeField] private GameSystemsConfig _defaultSystemsConfig;
         
@@ -50,7 +50,7 @@ namespace Whaledevelop
                 await InitializeSystemAsync(system, cancellationToken, false);
             }
 
-            var systemsHashSet = new HashSet<GameSystemScriptable>();
+            var systemsHashSet = new HashSet<GameSystem>();
             foreach (var system in _defaultSystemsConfig.UpdateOrder)
             {
                 system.AddToUpdateLists(_updates, _fixedUpdates, _lateUpdates);

@@ -9,7 +9,7 @@ using Whaledevelop.UI;
 namespace Whaledevelop.UIToolkit
 {
     [CreateAssetMenu(menuName = "Whaledevelop/Services/UIToolkitService", fileName = "UIToolkitService")]
-    public class UIToolkitService : ServiceScriptableObject, IUIToolkitService
+    public class UIToolkitService : Service, IUIToolkitService
     {
         [SerializeField] private UIDocument _uiDocumentPrefab;
         

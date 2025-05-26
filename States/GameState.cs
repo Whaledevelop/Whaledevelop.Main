@@ -3,9 +3,9 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Whaledevelop.Services;
 
-namespace Whaledevelop.GameStates
+namespace Whaledevelop
 {
-    public abstract class ScriptableGameState : ScriptableInitializable, IGameState
+    public abstract class GameState : ScriptableInitializable, IGameState
     {
     }
 }

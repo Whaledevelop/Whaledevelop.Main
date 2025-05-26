@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 namespace Whaledevelop.UI
 {
     [CreateAssetMenu(menuName = "Whaledevelop/Services/UIService", fileName = "UIService")]
-    public class UIService : ServiceScriptableObject, IUIService
+    public class UIService : Service, IUIService
     {
         [SerializeField]
         private GameObject _canvasPrefab;

@@ -2,7 +2,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Whaledevelop.Services;
 
-namespace Whaledevelop.GameStates
+namespace Whaledevelop
 {
     public interface IGameStatesService : IService
     {

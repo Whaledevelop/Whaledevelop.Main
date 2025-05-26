@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Whaledevelop.Services
 {
-    public abstract class ServiceScriptableObject : ScriptableInitializable, IService
+    public abstract class Service : ScriptableInitializable, IService
     {
     }
 }
