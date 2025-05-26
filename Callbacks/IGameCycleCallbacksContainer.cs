@@ -6,6 +6,6 @@ namespace Whaledevelop
     {
         event Action OnApplicationQuitEvent;
 
-        // event Action OnDrawGizmosEvent;
+        event Action OnDrawGizmosEvent;
     }
 }
