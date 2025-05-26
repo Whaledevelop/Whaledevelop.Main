@@ -77,7 +77,7 @@ namespace Whaledevelop.DiContainer.Internal
                 }
                 else
                 {
-                    Debug.LogWarning($"Nothing to inject {@object}");
+                    //Debug.LogWarning($"Nothing to inject {@object}");
                     return;
                 }
             }

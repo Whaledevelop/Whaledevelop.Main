@@ -18,7 +18,7 @@ namespace Whaledevelop.Services
             var servicesContainer = new ServicesContainer(Container);
             foreach (var service in _services)
             {
-                Container.BindToInterface<IService>(service);
+                Container.BindToAssignableInterface<IService>(service);
                 servicesContainer.Add(service);
             }
             Container.BindToInterface<IServicesContainer>(servicesContainer);

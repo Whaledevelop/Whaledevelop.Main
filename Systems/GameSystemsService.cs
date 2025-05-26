@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Sirenix.OdinInspector;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Whaledevelop.Services;
@@ -12,7 +14,7 @@ namespace Whaledevelop
     [CreateAssetMenu(menuName = "Whaledevelop/Services/GameSystemsService", fileName = "GameSystemsService")]
     public class GameSystemsService : Service, IGameSystemsService, IUpdate, IFixedUpdate, ILateUpdate
     {
-        [SerializeField] private GameSystemsConfig _defaultSystemsConfig;
+        [SerializeField] private GameSystem[] _initialGameSystems;
         
         [Inject]
         private IDiContainer _diContainer;
@@ -24,7 +26,21 @@ namespace Whaledevelop
         private readonly List<IFixedUpdate> _fixedUpdates = new();
         private readonly List<ILateUpdate> _lateUpdates = new();
         private readonly List<IGameSystem> _activeGameSystems = new();
-        
+
+
+        public UniTask AddSystemAsync(IGameSystem gameSystem, CancellationToken cancellationToken)
+        {
+            return !_activeGameSystems.Contains(gameSystem) 
+                ? InitializeSystemAsync(gameSystem, cancellationToken)
+                : UniTask.CompletedTask;
+        }
+
+        public UniTask RemoveSystemAsync(IGameSystem gameSystem, CancellationToken cancellationToken)
+        {
+            return _activeGameSystems.Contains(gameSystem) 
+                ? ReleaseSystemAsync(gameSystem, cancellationToken)
+                : UniTask.CompletedTask;
+        }
 
         public async UniTask UpdateSystemsAsync(IGameSystem[] gameSystems, CancellationToken cancellationToken)
         {
@@ -38,46 +54,26 @@ namespace Whaledevelop
             var systemsToAdd = gameSystems.Except(_activeGameSystems);
             foreach (var system in systemsToAdd)
             {
-                // TODO здесь тоже сортировку надо для апдейта
-                await InitializeSystemAsync(system, cancellationToken, true);
+                await InitializeSystemAsync(system, cancellationToken);
             }
         }
         
         protected override async UniTask OnInitializeAsync(CancellationToken cancellationToken)
         {
-            foreach (var system in _defaultSystemsConfig.GameSystems)
+            foreach (var system in _initialGameSystems)
             {
-                await InitializeSystemAsync(system, cancellationToken, false);
+                await InitializeSystemAsync(system, cancellationToken);
             }
-
-            var systemsHashSet = new HashSet<GameSystem>();
-            foreach (var system in _defaultSystemsConfig.UpdateOrder)
-            {
-                system.AddToUpdateLists(_updates, _fixedUpdates, _lateUpdates);
-                systemsHashSet.Add(system);
-            }
-            foreach (var system in _defaultSystemsConfig.GameSystems)
-            {
-                if (systemsHashSet.Contains(system))
-                {
-                    continue;
-                }
-                system.AddToUpdateLists(_updates, _fixedUpdates, _lateUpdates);
-            }
-
             _updateCallbacksContainer.OnUpdate += OnUpdate;
             _updateCallbacksContainer.OnFixedUpdate += OnFixedUpdate;
             _updateCallbacksContainer.OnLateUpdate += OnLateUpdate;
         }
 
-        private async UniTask InitializeSystemAsync(IGameSystem gameSystem, CancellationToken cancellationToken, bool addToUpdateLists)
+        private async UniTask InitializeSystemAsync(IGameSystem gameSystem, CancellationToken cancellationToken)
         {
             _diContainer.Inject(gameSystem);
             await gameSystem.InitializeAsync(cancellationToken);
-            if (addToUpdateLists)
-            {
-                gameSystem.AddToUpdateLists(_updates, _fixedUpdates, _lateUpdates);
-            }
+            gameSystem.AddToUpdateLists(_updates, _fixedUpdates, _lateUpdates);
             _activeGameSystems.Add(gameSystem);
         }
         
@@ -128,5 +124,29 @@ namespace Whaledevelop
                 lateUpdatable.OnLateUpdate();
             }
         }
+        
+#if UNITY_EDITOR
+        
+        // TODO сделать окно с выбором папки
+        private const string SearchPath = "Assets/_Game/Scriptables/Systems";
+        
+        [Button("Find Systems in Folder")]
+        private void FindAllSystemsInFolder()
+        {
+            var guids = AssetDatabase.FindAssets("t:GameSystemScriptable", new[] { SearchPath });
+            var found = guids
+                .Select(AssetDatabase.GUIDToAssetPath)
+                .Select(AssetDatabase.LoadAssetAtPath<GameSystem>)
+                .Where(x => x != null)
+                .ToList();
+
+            var current = new HashSet<GameSystem>(_initialGameSystems);
+            current.UnionWith(found);
+
+            _initialGameSystems = current.ToArray();
+            EditorUtility.SetDirty(this);
+            AssetDatabase.SaveAssets();
+        }
+#endif
     }
 }
