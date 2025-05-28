@@ -5,7 +5,7 @@ namespace Whaledevelop.Reactive
 {
     public static class ReactiveExtensions
     {
-        public static IDisposable AddTo(this IDisposable disposable, ICollection<IDisposable> disposables)
+        public static IDisposable AddToCollection(this IDisposable disposable, ICollection<IDisposable> disposables)
         {
             if (disposables == null)
             {

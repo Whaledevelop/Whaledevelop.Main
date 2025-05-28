@@ -35,7 +35,7 @@ namespace Whaledevelop.Starter
             }
             if (_mainContainerContext.Container.TryResolve<IGameStatesService>(out var gameStateService))
             {
-                await gameStateService.SetStateAsync(_startState, cancellationToken);
+                await gameStateService.ChangeStateAsync(_startState, cancellationToken);
             }
             else
             {

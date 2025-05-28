@@ -6,8 +6,6 @@ namespace Whaledevelop
 {
     public interface IGameStatesService : IService
     {
-        IGameState CurrentState { get; }
-        
-        UniTask SetStateAsync(IGameState state, CancellationToken cancellationToken);
+        UniTask ChangeStateAsync(IGameState nextState, CancellationToken cancellationToken);
     }
 }

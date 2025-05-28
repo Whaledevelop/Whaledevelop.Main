@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Whaledevelop.Reactive
 {
     public class ReactiveCollection<T> : IEnumerable<T>
     {
-        private readonly List<T> _items = new();
+        private readonly List<T> _items;
         private readonly Dictionary<int, List<Action<T>>> _indexSubscribers = new();
 
         public event Action<T> OnItemAdded;
@@ -37,7 +38,7 @@ namespace Whaledevelop.Reactive
                 }
             }
         }
-        
+
         public ReactiveCollection()
         {
             _items = new List<T>();
@@ -48,15 +49,45 @@ namespace Whaledevelop.Reactive
             _items = new List<T>(initialItems);
         }
 
-        public void Add(T item)
+        public bool Contains(T item)
         {
+            return _items.Contains(item);
+        }
+
+        public void Add(T item, bool allowDuplicates = false)
+        {
+            if (!allowDuplicates && Contains(item))
+            {
+                return;
+            }
+
             _items.Add(item);
 
             OnItemAdded?.Invoke(item);
             OnCollectionChanged?.Invoke();
         }
         
-        public void AddRange(IEnumerable<T> items)
+        public void Set(IEnumerable<T> items)
+        {
+            _items.Clear();
+
+            OnCleared?.Invoke();
+
+            _indexSubscribers.Clear();
+            
+            if (items == null)
+            {
+                return;
+            }
+            foreach (var item in items)
+            {
+                _items.Add(item);
+                OnItemAdded?.Invoke(item);
+            }
+            OnCollectionChanged?.Invoke();
+        }
+
+        public void AddRange(IEnumerable<T> items, bool allowDuplicates = false)
         {
             if (items == null)
             {
@@ -67,6 +98,11 @@ namespace Whaledevelop.Reactive
 
             foreach (var item in items)
             {
+                if (!allowDuplicates && Contains(item))
+                {
+                    continue;
+                }
+
                 _items.Add(item);
                 OnItemAdded?.Invoke(item);
                 changed = true;
@@ -80,6 +116,11 @@ namespace Whaledevelop.Reactive
 
         public bool Remove(T item)
         {
+            if (!Contains(item))
+            {
+                return false;
+            }
+
             var index = _items.IndexOf(item);
             var removed = _items.Remove(item);
 
