@@ -11,9 +11,15 @@ namespace Whaledevelop
         [SerializeField]
         private GameSystem[] _gameSystems;
 
-        public abstract UniTask EnableAsync(CancellationToken cancellationToken);
+        public virtual UniTask EnableAsync(CancellationToken cancellationToken)
+        {
+            return UniTask.CompletedTask;
+        }
 
-        public abstract UniTask DisableAsync(CancellationToken cancellationToken);
+        public virtual UniTask DisableAsync(CancellationToken cancellationToken)
+        {
+            return UniTask.CompletedTask;
+        }
 
         public string Name => name;
         

@@ -26,9 +26,12 @@ namespace Whaledevelop.Reactive
             _value = initialValue;
         }
 
-        public IDisposable Subscribe(Action<T> callback)
+        public IDisposable Subscribe(Action<T> callback, bool callCallbackFirstTime = true)
         {
-            callback?.Invoke(_value);
+            if (callCallbackFirstTime)
+            {
+                callback?.Invoke(_value);
+            }
             _onValueChanged += callback;
 
             return new Subscription(() => _onValueChanged -= callback);

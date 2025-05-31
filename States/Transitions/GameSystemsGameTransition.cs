@@ -32,7 +32,6 @@ namespace Whaledevelop.Transitions
 
         public async UniTask EndAsync(IGameState fromState, IGameState toState, CancellationToken cancellationToken)
         {
-            Debug.Log($"toState.RequiredGameSystems {toState.RequiredGameSystems.Count()}");
             foreach (var system in toState.RequiredGameSystems)
             {
                 if (_keepDuplicateSystems && fromState != null && fromState.RequiredGameSystems.Contains(system))

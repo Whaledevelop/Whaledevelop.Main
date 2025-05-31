@@ -19,6 +19,8 @@ namespace Whaledevelop.UI
 
         private readonly Dictionary<IUIViewModel, UIView> _viewsModelsDict = new();
 
+        public RectTransform CanvasRectTransform => _canvasRectTransform;
+
         public bool TryGetModel<T>(out T resultModel) where T : IUIViewModel
         {
             foreach (var (model, _) in _viewsModelsDict)
@@ -41,7 +43,7 @@ namespace Whaledevelop.UI
                 Debug.Log("View already opened");
                 return;
             }
-            var viewInstance = Object.Instantiate(viewPrefab, _canvasRectTransform);
+            var viewInstance = Object.Instantiate(viewPrefab, CanvasRectTransform);
             viewInstance.Model = viewModel;
             viewInstance.Initialize();
             _viewsModelsDict.Add(viewModel, viewInstance);

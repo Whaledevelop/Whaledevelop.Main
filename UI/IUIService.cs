@@ -1,4 +1,5 @@
-﻿using Whaledevelop.Services;
+﻿using UnityEngine;
+using Whaledevelop.Services;
 
 namespace Whaledevelop.UI
 {
@@ -10,5 +11,7 @@ namespace Whaledevelop.UI
         void OpenView(UIView viewPrefab, IUIViewModel viewModel);
 
         void CloseView(IUIViewModel viewModel);
+        
+        RectTransform CanvasRectTransform { get; }
     }
 }
