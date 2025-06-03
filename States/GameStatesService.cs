@@ -4,6 +4,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using Whaledevelop.Reactive;
 using Whaledevelop.Services;
 using Whaledevelop.Transitions;
 
@@ -22,11 +23,11 @@ namespace Whaledevelop
 
         [Inject] private IDiContainer _diContainer;
 
-        private IGameState _currentState;
-
         [ShowInInspector, ReadOnly]
         private List<IGameState> _usedStates = new();
 
+        public ReactiveValue<IGameState> CurrentState { get;  } = new();
+        
         protected override UniTask OnInitializeAsync(CancellationToken cancellationToken)
         {
             _transitions = new();
@@ -50,9 +51,11 @@ namespace Whaledevelop
             _usedStates.Clear();
         }
 
+
+
         public async UniTask ChangeStateAsync(IGameState toState, CancellationToken cancellationToken)
         {
-            var fromState = _currentState;
+            var fromState = CurrentState.Value;
             var noFromState = fromState == null;
             
             var transition = noFromState ? _defaultTransition 
@@ -64,7 +67,7 @@ namespace Whaledevelop
 
             if (!noFromState)
             {
-                await _currentState.DisableAsync(cancellationToken);
+                await CurrentState.Value.DisableAsync(cancellationToken);
             }
 
             await SetStateAsync(toState, cancellationToken);
@@ -74,10 +77,10 @@ namespace Whaledevelop
 
         private async UniTask SetStateAsync(IGameState nextState, CancellationToken cancellationToken)
         {
-            _currentState = nextState;
-            if (!_usedStates.Contains(_currentState))
+            CurrentState.Value = nextState;
+            if (!_usedStates.Contains(CurrentState.Value))
             {
-                _usedStates.Add(_currentState);
+                _usedStates.Add(CurrentState.Value);
                 _diContainer.Inject(nextState);
                 await nextState.InitializeAsync(cancellationToken);
             }
