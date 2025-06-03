@@ -7,7 +7,7 @@ using Object = UnityEngine.Object;
 
 namespace Whaledevelop.DiContainer.Internal
 {
-    class DiContainer : IDiContainer, IDisposable
+    class DiContainer : IDiInternalContainer, IDisposable
     {
         private readonly InjectableInfoContainer _injectableInfoContainer;
         private readonly Dictionary<BindKey, object> _parentBinds;
@@ -28,7 +28,7 @@ namespace Whaledevelop.DiContainer.Internal
                 }
             }
 
-            var bindKey = new BindKey(typeof(IDiContainer), null);
+            var bindKey = new BindKey(typeof(IDiInternalContainer), null);
             Binds.Remove(bindKey);
             Binds[bindKey] = this;
         }
@@ -136,18 +136,42 @@ namespace Whaledevelop.DiContainer.Internal
                 info.Method.Invoke(@object, null);
             }
         }
-        
+
+
+
+
         #region IDiContainer
-        
-        public void ResetBindings()
+
+        void IDiContainer.Inject<T>(T @object)
+            where T : class
         {
-            Binds.Clear();
-
-            Disposables.Clear(); 
+            Inject(@object);
         }
+        
+        T IDiContainer.Resolve<T>() where T : class
+        {
+            var key = new BindKey(typeof(T), null);
 
+            if (Binds.TryGetValue(key, out var result))
+            {
+                return result as T;
+            }
 
-        void IDiContainer.Bind<T>(T instance, string id)
+            Debug.LogError($"Nothing to resolve of type {typeof(T)}");
+
+            return default;
+        }
+        bool IDiContainer.TryResolve<T>(out T instance) where T : class
+        {
+            var key = new BindKey(typeof(T), null);
+
+            var exist = Binds.TryGetValue(key, out var result);
+            instance = exist ? result as T : default;
+
+            return exist;
+        }
+        
+        void IDiInternalContainer.Bind<T>(T instance, string id)
             where T : class
         {
             Assert.IsFalse(_isDisposed, "DiContainer already is disposed. Maybe you need to re inject correct DiContainer");
@@ -160,7 +184,7 @@ namespace Whaledevelop.DiContainer.Internal
             }
         }
 
-        void IDiContainer.Bind(Type type, object instance, string id)
+        void IDiInternalContainer.Bind(Type type, object instance, string id)
         {
             Assert.IsFalse(_isDisposed, "DiContainer already is disposed. Maybe you need to re inject correct DiContainer");
 
@@ -172,7 +196,7 @@ namespace Whaledevelop.DiContainer.Internal
             }
         }
 
-        bool IDiContainer.Unbind<T>(T instance, string id)
+        bool IDiInternalContainer.Unbind<T>(T instance, string id)
         {
             var bindKey = new BindKey(typeof(T), id);
 
@@ -184,7 +208,7 @@ namespace Whaledevelop.DiContainer.Internal
             return Binds.Remove(bindKey);
         }
 
-        bool IDiContainer.Unbind(Type type, object instance, string id)
+        bool IDiInternalContainer.Unbind(Type type, object instance, string id)
         {
             var bindKey = new BindKey(type, id);
 
@@ -196,20 +220,16 @@ namespace Whaledevelop.DiContainer.Internal
             return Binds.Remove(bindKey);
         }
 
-        void IDiContainer.Inject<T>(T @object)
-            where T : class
-        {
-            Inject(@object);
-        }
 
-        bool IDiContainer.IsInjectable<T>(T @object)
+
+        bool IDiInternalContainer.IsInjectable<T>(T @object)
             where T : class
         {
             var type = @object.GetType();
             return _injectableInfoContainer.GetInfo(type) != null;
         }
 
-        void IDiContainer.InjectGameObject(GameObject gameObject)
+        void IDiInternalContainer.InjectGameObject(GameObject gameObject)
         {
             // Для упрощения будет происходить поиск только по InjectableMonoBehaviour
             // Для правильной реализации стоит делать поиск по MonoBehaviour с аттрибутом [Inject]
@@ -220,7 +240,7 @@ namespace Whaledevelop.DiContainer.Internal
             }
         }
 
-        T IDiContainer.Resolve<T>(string id)
+        T IDiInternalContainer.Resolve<T>(string id)
             where T : class
         {
             if (Binds.TryGetValue(new(typeof(T), id), out var result))
@@ -233,7 +253,7 @@ namespace Whaledevelop.DiContainer.Internal
             return default;
         }
 
-        bool IDiContainer.TryResolve<T>(out T result, string id)
+        bool IDiInternalContainer.TryResolve<T>(out T result, string id)
             where T : class
         {
             var exist = Binds.TryGetValue(new(typeof(T), id), out var internalResult);

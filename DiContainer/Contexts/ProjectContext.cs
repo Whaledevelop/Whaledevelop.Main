@@ -19,7 +19,7 @@ namespace Whaledevelop.DiContainer
             "mscorlib"
         };
 
-        private readonly Dictionary<string, IDiContainer> _diContainers = new();
+        private readonly Dictionary<string, IDiInternalContainer> _diContainers = new();
         private InjectableInfoContainer _injectableInfoContainer;
 
         internal static ProjectContext Instance
@@ -37,7 +37,7 @@ namespace Whaledevelop.DiContainer
             }
         }
 
-        internal IDiContainer MainContainer { get; private set; }
+        internal IDiInternalContainer MainContainer { get; private set; }
 
         private void Initialize()
         {
@@ -62,10 +62,10 @@ namespace Whaledevelop.DiContainer
             _injectableInfoContainer.Initialization(allAssemblies);
 
             MainContainer = new Internal.DiContainer(_injectableInfoContainer, new());
-            MainContainer.Bind(MainContainer, "main");
+            MainContainer.Bind<IDiContainer>(MainContainer);
         }
 
-        internal IDiContainer CreateContainer(string containerId, IDiContainer baseContainer = null)
+        internal IDiInternalContainer CreateContainer(string containerId, IDiInternalContainer baseContainer = null)
         {
             Dictionary<BindKey, object> binds = null;
             HashSet<IDisposable> disposables;
@@ -95,7 +95,7 @@ namespace Whaledevelop.DiContainer
             return diContainer;
         }
 
-        internal IDiContainer GetContainer(string containerId)
+        internal IDiInternalContainer GetContainer(string containerId)
         {
             _diContainers.TryGetValue(containerId, out var container);
             return container;
@@ -124,7 +124,7 @@ namespace Whaledevelop.DiContainer
             }
         }
 
-        internal void DestroyContainer(IDiContainer container)
+        internal void DestroyContainer(IDiInternalContainer container)
         {
             foreach (var diContainer in _diContainers.Where(currentContainer => currentContainer.Value == container))
             {

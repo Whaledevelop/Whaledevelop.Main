@@ -23,7 +23,6 @@ namespace Whaledevelop.DiContainer
                 InjectType.SceneContext => DiContainerUtility.GetContainerById(SceneManager.GetActiveScene().name),
                 _ => throw new ArgumentOutOfRangeException(nameof(_injectType), _injectType, null)
             };
-            // TODO SceneContext maybe not initialized on async bind
             container.InjectGameObject(gameObject);
             Destroy(this);
         }
