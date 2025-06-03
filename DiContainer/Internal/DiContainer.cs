@@ -22,7 +22,6 @@ namespace Whaledevelop.DiContainer.Internal
 
             if (binds != null)
             {
-                // ReSharper disable once UseDeconstruction
                 foreach (var bind in binds)
                 {
                     Binds.Add(bind.Key, bind.Value);
@@ -117,6 +116,14 @@ namespace Whaledevelop.DiContainer.Internal
         }
 
         #region IDiContainer
+        
+        public void ResetBindings()
+        {
+            Binds.Clear();
+
+            Disposables.Clear(); 
+        }
+
 
         void IDiContainer.Bind<T>(T instance, string id)
             where T : class

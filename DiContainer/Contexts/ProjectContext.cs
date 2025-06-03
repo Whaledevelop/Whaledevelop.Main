@@ -100,6 +100,29 @@ namespace Whaledevelop.DiContainer
             _diContainers.TryGetValue(containerId, out var container);
             return container;
         }
+        
+        internal void DestroyAllContainers()
+        {
+            foreach (var kvp in _diContainers.Values.ToList())
+            {
+                if (kvp is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            }
+
+            _diContainers.Clear();
+        }
+        
+        internal static void Reset()
+        {
+            if (_instance != null)
+            {
+                _instance.DestroyAllContainers();
+                _instance.MainContainer = null;
+                _instance = null;
+            }
+        }
 
         internal void DestroyContainer(IDiContainer container)
         {

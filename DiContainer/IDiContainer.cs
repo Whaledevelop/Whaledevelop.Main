@@ -27,6 +27,8 @@ public interface IDiContainer
 
     bool TryResolve<T>(out T result, string id = null)
         where T : class;
+
+    void ResetBindings();
 }
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Property)]
