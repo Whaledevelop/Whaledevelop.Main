@@ -1,8 +1,7 @@
 ﻿using System;
 using UnityEngine;
-using Whaledevelop.Transitions;
 
-namespace Whaledevelop
+namespace Whaledevelop.GameStates
 {
 
     [Serializable]

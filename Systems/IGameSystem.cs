@@ -1,4 +1,4 @@
-﻿namespace Whaledevelop
+﻿namespace Whaledevelop.GameSystems
 {
     public interface IGameSystem : IInitializable
     {

@@ -6,9 +6,8 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using Whaledevelop.Reactive;
 using Whaledevelop.Services;
-using Whaledevelop.Transitions;
 
-namespace Whaledevelop
+namespace Whaledevelop.GameStates
 {
     [CreateAssetMenu(menuName = "Whaledevelop/Services/GameStatesService", fileName = "GameStatesService")]
     public class GameStatesService : Service, IGameStatesService

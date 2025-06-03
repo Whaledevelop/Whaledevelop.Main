@@ -53,7 +53,7 @@ namespace Whaledevelop.UI
         {
             if (!_viewsModelsDict.TryGetValue(viewModel, out var viewInstance))
             {
-                Debug.Log("No view instance");
+                Debug.Log($"CloseView - no view instance for {viewModel.GetType()}");
                 return;
             }
             viewInstance.Release();

@@ -3,8 +3,9 @@ using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Whaledevelop.GameSystems;
 
-namespace Whaledevelop.Transitions
+namespace Whaledevelop.GameStates
 {
     [Serializable]
     public class GameSystemsGameTransition : IGameTransition

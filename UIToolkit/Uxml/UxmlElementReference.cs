@@ -15,7 +15,9 @@ namespace Whaledevelop.UIToolkit
         [SerializeField]
         private VisualTreeAsset _uxml;
 
+#if UNITY_EDITOR
         [ValueDropdown(nameof(GetElementNames))]
+        #endif
         [SerializeField]
         private string _elementName;
 

@@ -4,7 +4,7 @@ using Sopka;
 using Whaledevelop.Reactive;
 using Whaledevelop.Services;
 
-namespace Whaledevelop
+namespace Whaledevelop.GameStates
 {
     public interface IGameStatesService : IService
     {

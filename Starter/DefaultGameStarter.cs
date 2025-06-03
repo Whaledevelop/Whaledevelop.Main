@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using Whaledevelop.DiContainer;
 using Whaledevelop;
+using Whaledevelop.GameStates;
 using Whaledevelop.Services;
 
 namespace Whaledevelop.Starter

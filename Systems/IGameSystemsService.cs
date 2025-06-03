@@ -2,7 +2,7 @@
 using Cysharp.Threading.Tasks;
 using Whaledevelop.Services;
 
-namespace Whaledevelop
+namespace Whaledevelop.GameSystems
 {
     public interface IGameSystemsService : IService
     {

@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Whaledevelop.GameSystems;
 
-namespace Whaledevelop
+namespace Whaledevelop.GameStates
 {
     public interface IGameState : IInitializable
     {
