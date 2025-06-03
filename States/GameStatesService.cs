@@ -20,12 +20,18 @@ namespace Whaledevelop.GameStates
 
         private Dictionary<(GameState from, GameState to), IGameTransition> _transitions;
 
-        [Inject] private IDiContainer _diContainer;
+        private IDiContainer _diContainer;
 
         [ShowInInspector, ReadOnly]
         private List<IGameState> _usedStates = new();
 
         public ReactiveValue<IGameState> CurrentState { get;  } = new();
+
+        [Inject]
+        public void Construct(IDiContainer diContainer)
+        {
+            _diContainer = diContainer;
+        }
         
         protected override UniTask OnInitializeAsync(CancellationToken cancellationToken)
         {

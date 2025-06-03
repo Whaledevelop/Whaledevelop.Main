@@ -1,5 +1,4 @@
 ﻿using System;
-using JetBrains.Annotations;
 using UnityEngine;
 
 public interface IDiContainer
@@ -29,12 +28,4 @@ public interface IDiContainer
         where T : class;
 
     void ResetBindings();
-}
-
-[AttributeUsage(AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Property)]
-[MeansImplicitUse]
-public class InjectAttribute : Attribute
-{
-    public string ID;
-    public bool Optional;
 }

@@ -63,7 +63,7 @@ namespace Whaledevelop.DiContainer.Internal
         private void Inject<T>(T @object)
             where T : class
         {
-            Assert.IsFalse(_isDisposed, "DiContainer already is disposed. Maybe you need to re inject correct DiContainer");
+            Assert.IsFalse(_isDisposed, "DiContainer already is disposed. Maybe you need to re-inject correct DiContainer");
 
             var type = @object.GetType();
             var info = _injectableInfoContainer.GetInfo(type);
@@ -76,37 +76,59 @@ namespace Whaledevelop.DiContainer.Internal
                 }
                 else
                 {
-                    //Debug.LogWarning($"Nothing to inject {@object}");
                     return;
                 }
             }
 
-            for (var i = 0; i < info.Fields.Count; i++)
+            foreach (var injectableFieldInfo in info.Fields)
             {
-                var injectableFieldInfo = info.Fields[i];
                 var bindKey = new BindKey(injectableFieldInfo.TargetType, injectableFieldInfo.Id);
+
                 if (Binds.TryGetValue(bindKey, out var bind))
                 {
                     injectableFieldInfo.SetValue(@object, bind);
                 }
                 else if (!injectableFieldInfo.Optional)
                 {
-                    Debug.LogError($"Failed to inject {@object}. Not found type {injectableFieldInfo.TargetType} with id = {injectableFieldInfo.Id}", @object as Object);
+                    Debug.LogError($"[DiContainer] Failed to inject field: {injectableFieldInfo.TargetType} (id={injectableFieldInfo.Id})", @object as Object);
                 }
             }
 
-            for (var i = 0; i < info.Properties.Count; i++)
+            foreach (var injectablePropertyInfo in info.Properties)
             {
-                var injectablePropertyInfo = info.Properties[i];
                 var bindKey = new BindKey(injectablePropertyInfo.TargetType, injectablePropertyInfo.Id);
+
                 if (Binds.TryGetValue(bindKey, out var bind))
                 {
                     injectablePropertyInfo.SetValue(@object, bind);
                 }
                 else if (!injectablePropertyInfo.Optional)
                 {
-                    Debug.LogError($"Failed to inject {@object}. Not found type {injectablePropertyInfo.TargetType} with id = {injectablePropertyInfo.Id}", @object as Object);
+                    Debug.LogError($"[DiContainer] Failed to inject property: {injectablePropertyInfo.TargetType} (id={injectablePropertyInfo.Id})", @object as Object);
                 }
+            }
+
+            if (info.ConstructMethod != null)
+            {
+                var paramInfos = info.ConstructParameters;
+                var args = new object[paramInfos.Count];
+
+                for (int i = 0; i < paramInfos.Count; i++)
+                {
+                    var bindKey = new BindKey(paramInfos[i].Type, paramInfos[i].Id);
+
+                    if (Binds.TryGetValue(bindKey, out var dependency))
+                    {
+                        args[i] = dependency;
+                    }
+                    else
+                    {
+                        Debug.LogError($"[DiContainer] Failed to inject Construct(...) parameter: {paramInfos[i].Type} (id={paramInfos[i].Id})", @object as Object);
+                        return;
+                    }
+                }
+
+                info.ConstructMethod.Invoke(@object, args);
             }
 
             if (info.Method != null)
@@ -114,7 +136,7 @@ namespace Whaledevelop.DiContainer.Internal
                 info.Method.Invoke(@object, null);
             }
         }
-
+        
         #region IDiContainer
         
         public void ResetBindings()

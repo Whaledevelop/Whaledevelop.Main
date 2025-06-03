@@ -75,34 +75,62 @@ namespace Whaledevelop.DiContainer.Internal
         private static InjectableTypeInfo ProcessMethods(Type type, InjectableTypeInfo currentTypeInfoOfType)
         {
             var methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
             for (var i = 0; i < methods.Length; i++)
             {
-                if (methods[i].ReturnType != typeof(void) || methods[i].GetParameters().Length != 0)
-                {
-                    continue;
-                }
+                var method = methods[i];
+                var attributes = method.GetCustomAttributes(true);
 
-                foreach (var attribute in methods[i].GetCustomAttributes(true))
+                foreach (var attribute in attributes)
                 {
-                    if (!(attribute is InjectAttribute))
+                    if (attribute is not InjectAttribute)
                     {
                         continue;
                     }
 
                     currentTypeInfoOfType ??= new();
+
+                    if (method.Name == "Construct" && method.ReturnType == typeof(void))
+                    {
+                        if (currentTypeInfoOfType.ConstructMethod != null)
+                        {
+                            throw new($"DiContainer supports only one [Inject] Construct method per type: {type}");
+                        }
+
+                        currentTypeInfoOfType.ConstructMethod = method;
+
+                        var parameters = method.GetParameters();
+                        for (int j = 0; j < parameters.Length; j++)
+                        {
+                            currentTypeInfoOfType.ConstructParameters.Add(new(
+                                parameters[j].ParameterType,
+                                null // если нужно — поддержка ID позже
+                            ));
+                        }
+
+                        continue;
+                    }
+
+                    if (method.ReturnType != typeof(void) || method.GetParameters().Length != 0)
+                    {
+                        continue;
+                    }
+
                     if (currentTypeInfoOfType.Method != null)
                     {
-                        if ((currentTypeInfoOfType.Method.IsAbstract
-                                || currentTypeInfoOfType.Method.IsVirtual)
-                            && type == methods[i].ReflectedType)
+                        if ((currentTypeInfoOfType.Method.IsAbstract || currentTypeInfoOfType.Method.IsVirtual)
+                            && type == method.ReflectedType)
                         {
                             continue;
                         }
-                        throw new($"DiContainer works only with 1 inject method. Please fix type {type}");
+
+                        throw new($"DiContainer works only with 1 [Inject] method. Please fix type {type}");
                     }
-                    currentTypeInfoOfType.Method = methods[i];
+
+                    currentTypeInfoOfType.Method = method;
                 }
             }
+
             return currentTypeInfoOfType;
         }
 

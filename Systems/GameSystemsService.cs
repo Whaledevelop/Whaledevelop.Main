@@ -12,14 +12,18 @@ namespace Whaledevelop.GameSystems
     [CreateAssetMenu(menuName = "Whaledevelop/Services/GameSystemsService", fileName = "GameSystemsService")]
     public class GameSystemsService : Service, IGameSystemsService
     {
-        [Inject]
         private IDiContainer _diContainer;
-
-        [Inject]
         private IUpdateCallbacks _updateCallbacks;
 
         private readonly UpdateDispatcher _updatesDispatcher = new();
         private readonly List<IGameSystem> _activeGameSystems = new();
+
+        [Inject]
+        private void Construct(IDiContainer diContainer, IUpdateCallbacks updateCallbacks)
+        {
+            _diContainer = diContainer;
+            _updateCallbacks = updateCallbacks;
+        }
 
         protected override UniTask OnInitializeAsync(CancellationToken cancellationToken)
         {
