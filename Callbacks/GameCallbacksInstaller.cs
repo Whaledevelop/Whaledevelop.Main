@@ -14,8 +14,8 @@ namespace Whaledevelop
             var monoBehaviourCallbacks = monoBehaviourCallbacksGameObject.AddComponent<MonoBehaviourCallbacks>();
             Object.DontDestroyOnLoad(monoBehaviourCallbacksGameObject);
 
-            Container.Bind<IGameCycleCallbacksContainer>(monoBehaviourCallbacks);
-            Container.Bind<IUpdateCallbacksContainer>(monoBehaviourCallbacks);
+            Container.Bind<IGameCycleCallbacks>(monoBehaviourCallbacks);
+            Container.Bind<IUpdateCallbacks>(monoBehaviourCallbacks);
         }
     }
 }

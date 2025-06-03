@@ -2,7 +2,7 @@
 
 namespace Whaledevelop
 {
-    public interface IGameCycleCallbacksContainer
+    public interface IGameCycleCallbacks
     {
         event Action OnApplicationQuitEvent;
 

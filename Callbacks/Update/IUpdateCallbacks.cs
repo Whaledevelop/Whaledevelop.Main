@@ -2,7 +2,7 @@
 
 namespace Whaledevelop
 {
-    public interface IUpdateCallbacksContainer
+    public interface IUpdateCallbacks
     {
         event Action OnUpdate;
         

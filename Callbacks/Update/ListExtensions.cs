@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Whaledevelop.GameSystems
+namespace Whaledevelop
 {
     public static class ListExtensions
     {
