@@ -8,12 +8,12 @@ using Whaledevelop.DiContainer;
 namespace Whaledevelop.Services
 {
     [CreateAssetMenu(fileName = nameof(ServicesInstaller), menuName = "Whaledevelop/Installers/" + nameof(ServicesInstaller))]
-    public class ServicesInstaller : SingletonScriptableObjectInstaller
+    public class ServicesInstaller : ScriptableObjectInstaller
     {
         [SerializeField]
         private Service[] _services;
 
-        protected override void OnInstallBindings()
+        public override void InstallBindings()
         {
             var servicesContainer = new ServicesContainer(Container);
             foreach (var service in _services)
