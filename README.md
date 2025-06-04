@@ -6,7 +6,7 @@ Commonly used scripts that are meant to be added to unity projects as module.
 
 ## Adding as submodule
 in git bash :
-`git submodule add https://github.com/Whaledevelop/Whaledevelop.git Assets/_Whaledevelop`
+`git submodule add https://github.com/Whaledevelop/Whaledevelop.Main.git Assets/_Whaledevelop.Main`
 
 ## Basic project setup
 - Create Whaledevelop/Installers/ServicesInstaller
