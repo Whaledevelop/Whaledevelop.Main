@@ -34,6 +34,11 @@ namespace Whaledevelop.Starter
             {
                 Debug.LogError("Could not find ServicesContainer");
             }
+            if (!_startState)
+            {
+                Debug.LogError("Could not find StartState");
+                return;
+            }
             if (_mainContainerContext.Container.TryResolve<IGameStatesService>(out var gameStateService))
             {
                 await gameStateService.ChangeStateAsync(_startState, cancellationToken);
