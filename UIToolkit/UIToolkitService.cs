@@ -1,19 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Whaledevelop.Services;
+using Object = UnityEngine.Object;
 
 namespace Whaledevelop.UIToolkit
 {
-    [CreateAssetMenu(menuName = "Whaledevelop/Services/UIToolkitService", fileName = "UIToolkitService")]
-    public class UIToolkitService : Service, IUIToolkitService
+    [Serializable]
+    public class UIToolkitService : Initializable, IUIToolkitService
     {
         [SerializeField] private UIDocument _uiDocumentPrefab;
         
         private readonly List<UIController> _controllers = new();
         private UIDocument _uiDocument;
+        
         protected override UniTask OnInitializeAsync(CancellationToken cancellationToken)
         {
             _uiDocument = Object.Instantiate(_uiDocumentPrefab);

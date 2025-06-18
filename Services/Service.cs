@@ -1,11 +1,6 @@
-﻿using System;
-using System.Threading;
-using Cysharp.Threading.Tasks;
-using UnityEngine;
-
-namespace Whaledevelop.Services
+﻿namespace Whaledevelop.Services
 {
-    public abstract class Service : ScriptableInitializable, IService
+    public abstract class Service : Initializable, IService
     {
     }
 }

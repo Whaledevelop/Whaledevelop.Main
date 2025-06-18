@@ -3,24 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Sirenix.OdinInspector;
-using UnityEngine;
 using Whaledevelop.Services;
 
 namespace Whaledevelop.GameSystems
 {
-    [CreateAssetMenu(menuName = "Whaledevelop/Services/GameSystemsService", fileName = "GameSystemsService")]
+    [Serializable]
     public class GameSystemsService : Service, IGameSystemsService
     {
-        [Inject]
         private IDiContainer _diContainer;
 
-        [Inject]
         private IUpdateCallbacks _updateCallbacks;
 
         private readonly UpdateDispatcher _updatesDispatcher = new();
         private readonly List<IGameSystem> _activeGameSystems = new();
 
+        [Inject]
+        private void Construct(IDiContainer diContainer, IUpdateCallbacks updateCallbacks)
+        {
+            _diContainer = diContainer;
+            _updateCallbacks = updateCallbacks;
+        }
+        
         protected override UniTask OnInitializeAsync(CancellationToken cancellationToken)
         {
             _updatesDispatcher.Initialize(_updateCallbacks);
