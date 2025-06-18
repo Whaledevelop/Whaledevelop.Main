@@ -1,25 +1,21 @@
 ﻿using UnityEngine;
-using Whaledevelop.DiContainer;
-
 
 namespace Whaledevelop.Services
 {
     [CreateAssetMenu(fileName = nameof(ServicesInstaller), menuName = "Whaledevelop/Installers/" + nameof(ServicesInstaller))]
-    public class ServicesInstaller : ScriptableObjectInstaller
+    public class ServicesInstaller : ScriptableObject, IInstallerWrapper
     {
-        [SerializeField] private int _test;
-        
         [SerializeReference] 
         private IService[] _services;
-        
-        public override void InstallBindings()
+
+        public void InstallBindings(IDiContainerWrapper container)
         {
             var servicesContainer = new ServicesContainer(_services);
             foreach (var service in _services)
             {
-                Container.BindToAssignableInterface<IService>(service);
+                container.BindToAssignableInterface(service);
             }
-            Container.BindToInterface<IServicesContainer>(servicesContainer);
+            container.Bind<IServicesContainer>(servicesContainer);
         }
     }
 }

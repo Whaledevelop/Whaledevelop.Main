@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using Whaledevelop.DiContainer;
 using Whaledevelop.Services;
 
 namespace Whaledevelop.GameStates
@@ -15,14 +14,13 @@ namespace Whaledevelop.GameStates
         private Dictionary<(TEnum from, TEnum to), IGameTransition> _transitionsDict;
         private Dictionary<TEnum, IGameState> _statesDict;
         
-        private IDiContainer _diContainer;
-
         private (TEnum code, IGameState state) _currentState;
 
-        [Inject]
-        private void Construct(IDiContainer diContainer)
+        private IDiContainerWrapper _diContainerWrapper;
+        
+        public void Construct(IDiContainerWrapper diContainerWrapper)
         {
-            _diContainer = diContainer;
+            _diContainerWrapper = diContainerWrapper;
         }
         
         public async UniTask ChangeStateAsync(TEnum toStateCode, CancellationToken cancellationToken)
@@ -38,12 +36,12 @@ namespace Whaledevelop.GameStates
             var transition = noFromState ? _config.DefaultTransition 
                 : _transitionsDict.GetValueOrDefault((fromStateCode, toStateCode), _config.DefaultTransition);
 
-            _diContainer.Inject(transition);
+            _diContainerWrapper.Inject(transition);
             
             await transition.BeginAsync(fromState, toState, cancellationToken);
 
             _currentState = (toStateCode, toState);
-            _diContainer.Inject(toState);
+            _diContainerWrapper.Inject(toState);
             await toState.InitializeAsync(cancellationToken);
             
             await transition.EndAsync(fromState, toState, cancellationToken);

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Whaledevelop.DiContainer;
 using Whaledevelop.Services;
 
 namespace Whaledevelop.GameSystems
@@ -10,18 +9,16 @@ namespace Whaledevelop.GameSystems
     [Serializable]
     public class GameSystemsService : Service, IGameSystemsService
     {
-        private IDiContainer _diContainer;
-
+        private IDiContainerWrapper _diContainerWrapper;
         private IUpdateCallbacks _updateCallbacks;
 
         private readonly UpdateDispatcher _updatesDispatcher = new();
         private readonly List<IGameSystem> _activeGameSystems = new();
 
-        [Inject]
-        private void Construct(IDiContainer diContainer, IUpdateCallbacks updateCallbacks)
+        public void Construct(IDiContainerWrapper diContainerWrapper)
         {
-            _diContainer = diContainer;
-            _updateCallbacks = updateCallbacks;
+            _diContainerWrapper = diContainerWrapper;
+            _updateCallbacks = _diContainerWrapper.Resolve<IUpdateCallbacks>();
         }
         
         protected override UniTask OnInitializeAsync(CancellationToken cancellationToken)
@@ -44,7 +41,7 @@ namespace Whaledevelop.GameSystems
 
         public async UniTask InitializeSystemAsync(IGameSystem gameSystem, CancellationToken cancellationToken)
         {
-            _diContainer.Inject(gameSystem);
+            _diContainerWrapper.Inject(gameSystem);
 
             await gameSystem.InitializeAsync(cancellationToken);
 

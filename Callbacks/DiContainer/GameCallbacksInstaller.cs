@@ -1,21 +1,20 @@
 ﻿using System;
 using UnityEngine;
-using Whaledevelop.DiContainer;
 using Object = UnityEngine.Object;
 
 namespace Whaledevelop
 {
     [Serializable]
-    public class GameCallbacksInstaller : MonoInstaller
+    public class GameCallbacksInstaller : IInstallerWrapper
     {
-        public override void InstallBindings()
+        public void InstallBindings(IDiContainerWrapper container)
         {
             var monoBehaviourCallbacksGameObject = new GameObject(nameof(MonoBehaviourCallbacks));
             var monoBehaviourCallbacks = monoBehaviourCallbacksGameObject.AddComponent<MonoBehaviourCallbacks>();
             Object.DontDestroyOnLoad(monoBehaviourCallbacksGameObject);
 
-            Container.Bind<IGameCycleCallbacks>(monoBehaviourCallbacks);
-            Container.Bind<IUpdateCallbacks>(monoBehaviourCallbacks);
+            container.Bind<IGameCycleCallbacks>(monoBehaviourCallbacks);
+            container.Bind<IUpdateCallbacks>(monoBehaviourCallbacks);
         }
     }
 }

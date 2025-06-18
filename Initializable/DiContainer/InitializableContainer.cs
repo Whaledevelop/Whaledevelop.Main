@@ -1,7 +1,6 @@
 ﻿using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using Whaledevelop.DiContainer;
 
 namespace Whaledevelop
 {
@@ -9,14 +8,13 @@ namespace Whaledevelop
     {
         private readonly T[] _items;
 
-        private IDiContainer _diContainer;
-
         public bool Initialized { get; private set; }
-
-        [Inject]
-        private void Construct(IDiContainer diContainer)
+        
+        private IDiContainerWrapper _diContainerWrapper;
+        
+        public void Construct(IDiContainerWrapper diContainerWrapper)
         {
-            _diContainer = diContainer;
+            _diContainerWrapper = diContainerWrapper;
         }
         
         protected InitializableContainer(T[] items)
@@ -37,7 +35,7 @@ namespace Whaledevelop
                 {
                     continue;
                 }
-                _diContainer.Inject(item);
+                _diContainerWrapper.Inject(item);
                 await item.InitializeAsync(cancellationToken);
             }
             Initialized = true;
