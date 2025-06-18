@@ -16,7 +16,7 @@ namespace Whaledevelop.DiContainer
         [SerializeReference]
         private List<MonoInstaller> _monoInstallers = new();
 
-        public IDiContainer Container { get; private set; }
+        public IDiInternalContainer Container { get; private set; }
 
         public void InstallBindings()
         {
