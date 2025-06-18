@@ -6,8 +6,8 @@ namespace Whaledevelop.GameSystems
 {
     public interface IGameSystemsService : IService
     {
-        UniTask AddSystemAsync(IGameSystem gameSystem, CancellationToken cancellationToken);
-        UniTask RemoveSystemAsync(IGameSystem gameSystem, CancellationToken cancellationToken);
-        UniTask UpdateSystemsAsync(IGameSystem[] gameSystems, CancellationToken cancellationToken);
+        UniTask InitializeSystemAsync(IGameSystem gameSystem, CancellationToken cancellationToken);
+        
+        UniTask ReleaseSystemAsync(IGameSystem gameSystem, CancellationToken cancellationToken);
     }
 }

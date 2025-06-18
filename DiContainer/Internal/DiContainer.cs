@@ -174,16 +174,16 @@ namespace Whaledevelop.DiContainer.Internal
             return Binds.Remove(bindKey);
         }
 
-        void IDiContainer.Inject<T>(T @object)
+        void IDiContainer.Inject<T>(T instance)
             where T : class
         {
-            Inject(@object);
+            Inject(instance);
         }
 
-        bool IDiContainer.IsInjectable<T>(T @object)
+        bool IDiContainer.IsInjectable<T>(T instance)
             where T : class
         {
-            var type = @object.GetType();
+            var type = instance.GetType();
             return _injectableInfoContainer.GetInfo(type) != null;
         }
 

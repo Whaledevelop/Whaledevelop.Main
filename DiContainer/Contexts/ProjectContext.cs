@@ -80,10 +80,8 @@ namespace Whaledevelop.DiContainer
                 disposables = new();
             }
 
-            if (_diContainers.TryGetValue(containerId, out var previousDiContainer))
+            if (_diContainers.Remove(containerId, out var previousDiContainer))
             {
-                _diContainers.Remove(containerId);
-
                 if (previousDiContainer is IDisposable disposable)
                 {
                     disposable.Dispose();

@@ -31,18 +31,34 @@ namespace Whaledevelop.GameSystems
             Clear();
         }
 
-        public void Register(object system)
+        public void TryRegister<T>(T item) where T : class
         {
-            _updates.AddIfType(system);
-            _fixedUpdates.AddIfType(system);
-            _lateUpdates.AddIfType(system);
+            AddIfType(_updates, item);
+            AddIfType(_fixedUpdates, item);
+            AddIfType(_lateUpdates, item);
         }
 
-        public void Unregister(object system)
+        public void TryUnregister(object item)
         {
-            _updates.RemoveIfType(system);
-            _fixedUpdates.RemoveIfType(system);
-            _lateUpdates.RemoveIfType(system);
+            RemoveIfType(_updates, item);
+            RemoveIfType(_fixedUpdates, item);
+            RemoveIfType(_lateUpdates, item);
+        }
+        
+        private static void AddIfType<T1, T2>(IList<T2> list, T1 item, bool checkContains = true) where T1 : class where T2 : class
+        {
+            if (item is T2 itemOfType && (!checkContains || !list.Contains(itemOfType)))
+            {
+                list.Add(itemOfType);
+            }
+        }
+        
+        private static void RemoveIfType<T1, T2>(IList<T2> list, T1 item, bool checkContains = true)
+        {
+            if (item is T2 itemOfType && (!checkContains || list.Contains(itemOfType)))
+            {
+                list.Remove(itemOfType);
+            }
         }
 
         public void Clear()

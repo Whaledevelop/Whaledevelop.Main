@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Whaledevelop.GameStates
 {
     [Serializable]
-    public class StateEntry<TEnum> where TEnum : Enum
+    public class GameStateEntry<TEnum> where TEnum : Enum
     {
         [field: SerializeField] public TEnum Code { get; private set; }
             

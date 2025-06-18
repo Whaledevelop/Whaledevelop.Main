@@ -7,6 +7,8 @@ namespace Whaledevelop.Services
     [CreateAssetMenu(fileName = nameof(ServicesInstaller), menuName = "Whaledevelop/Installers/" + nameof(ServicesInstaller))]
     public class ServicesInstaller : ScriptableObjectInstaller
     {
+        [SerializeField] private int _test;
+        
         [SerializeReference] 
         private IService[] _services;
         
