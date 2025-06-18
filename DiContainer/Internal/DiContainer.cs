@@ -1,26 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Object = UnityEngine.Object;
 
 namespace Whaledevelop.DiContainer.Internal
 {
-    class DiContainer : IDiInternalContainer, IDisposable
+    class DiContainer : IDiContainer, IDisposable
     {
         private readonly InjectableInfoContainer _injectableInfoContainer;
         private readonly Dictionary<BindKey, object> _parentBinds;
 
         private bool _isDisposed;
 
-        internal HashSet<IDisposable> Disposables { get; }
-
-        internal Dictionary<BindKey, object> Binds { get; } = new();
-
-        public DiContainer(
-            InjectableInfoContainer injectableInfoContainer,
-            HashSet<IDisposable> disposables,
-            Dictionary<BindKey, object> binds = null)
+        public DiContainer(InjectableInfoContainer injectableInfoContainer, HashSet<IDisposable> disposables, Dictionary<BindKey, object> binds = null)
         {
             _injectableInfoContainer = injectableInfoContainer;
             Disposables = disposables;
@@ -34,11 +28,16 @@ namespace Whaledevelop.DiContainer.Internal
                 }
             }
 
-            var selfKey = new BindKey(typeof(IDiInternalContainer), null);
-
-            Binds.Remove(selfKey);
-            Binds[selfKey] = this;
+            var bindKey = new BindKey(typeof(IDiContainer), null);
+            Binds.Remove(bindKey);
+            Binds[bindKey] = this;
         }
+
+        internal HashSet<IDisposable> Disposables { get; }
+
+        internal Dictionary<BindKey, object> Binds { get; } = new();
+
+        #region IDisposable
 
         public void Dispose()
         {
@@ -48,15 +47,9 @@ namespace Whaledevelop.DiContainer.Internal
             }
 
             _isDisposed = true;
-
-            foreach (var pair in Binds)
+            foreach (var bind in Binds.Where(bind => _parentBinds == null || !_parentBinds.ContainsKey(bind.Key)))
             {
-                if (_parentBinds != null && _parentBinds.ContainsKey(pair.Key))
-                {
-                    continue;
-                }
-
-                if (pair.Value is IDisposable disposable && Disposables.Remove(disposable))
+                if (bind.Value is IDisposable disposable && Disposables.Remove(disposable))
                 {
                     disposable.Dispose();
                 }
@@ -65,140 +58,79 @@ namespace Whaledevelop.DiContainer.Internal
             Binds.Clear();
         }
 
-        private void Inject<T>(T target)
+        #endregion
+
+        private void Inject<T>(T @object)
             where T : class
         {
-            Assert.IsFalse(_isDisposed, "DiContainer already is disposed.");
+            Assert.IsFalse(_isDisposed, "DiContainer already is disposed. Maybe you need to re inject correct DiContainer");
 
-            var type = target.GetType();
-            var info = _injectableInfoContainer.GetInfo(type)
-                       ?? (type.IsGenericType ? _injectableInfoContainer.ProcessType(type) : null);
+            var type = @object.GetType();
+            var info = _injectableInfoContainer.GetInfo(type);
 
             if (info == null)
             {
-                return;
-            }
-
-            InjectFields(target, info);
-            InjectProperties(target, info);
-            InjectConstructor(target, info);
-            InjectPostMethod(target, info);
-        }
-
-        private void InjectFields<T>(T target, InjectableTypeInfo info)
-        {
-            foreach (var field in info.Fields)
-            {
-                var key = new BindKey(field.TargetType, field.Id);
-
-                if (Binds.TryGetValue(key, out var value))
+                if (type.IsGenericType)
                 {
-                    field.SetValue(target, value);
-                }
-                else if (!field.Optional)
-                {
-                    Debug.LogError($"[DiContainer] Failed to inject field: {field.TargetType} (id={field.Id})", target as Object);
-                }
-            }
-        }
-
-        private void InjectProperties<T>(T target, InjectableTypeInfo info)
-        {
-            foreach (var property in info.Properties)
-            {
-                var key = new BindKey(property.TargetType, property.Id);
-
-                if (Binds.TryGetValue(key, out var value))
-                {
-                    property.SetValue(target, value);
-                }
-                else if (!property.Optional)
-                {
-                    Debug.LogError($"[DiContainer] Failed to inject property: {property.TargetType} (id={property.Id})", target as Object);
-                }
-            }
-        }
-
-        private void InjectConstructor<T>(T target, InjectableTypeInfo info)
-        {
-            if (info.ConstructMethod == null)
-            {
-                return;
-            }
-
-            var parameters = info.ConstructParameters;
-            var args = new object[parameters.Count];
-
-            for (int i = 0; i < parameters.Count; i++)
-            {
-                var param = parameters[i];
-                var key = new BindKey(param.Type, param.Id);
-
-                if (Binds.TryGetValue(key, out var value))
-                {
-                    args[i] = value;
+                    info = _injectableInfoContainer.ProcessType(type);
                 }
                 else
                 {
-                    Debug.LogError($"[DiContainer] Failed to inject Construct(...) parameter: {param.Type} (id={param.Id})", target as Object);
+                    //Debug.LogWarning($"Nothing to inject {@object}");
                     return;
                 }
             }
 
-            info.ConstructMethod.Invoke(target, args);
-        }
+            for (var i = 0; i < info.Fields.Count; i++)
+            {
+                var injectableFieldInfo = info.Fields[i];
+                var bindKey = new BindKey(injectableFieldInfo.TargetType, injectableFieldInfo.Id);
+                if (Binds.TryGetValue(bindKey, out var bind))
+                {
+                    injectableFieldInfo.SetValue(@object, bind);
+                }
+                else if (!injectableFieldInfo.Optional)
+                {
+                    Debug.LogError($"Failed to inject {@object}. Not found type {injectableFieldInfo.TargetType} with id = {injectableFieldInfo.Id}", @object as Object);
+                }
+            }
 
-        private void InjectPostMethod<T>(T target, InjectableTypeInfo info)
-        {
+            for (var i = 0; i < info.Properties.Count; i++)
+            {
+                var injectablePropertyInfo = info.Properties[i];
+                var bindKey = new BindKey(injectablePropertyInfo.TargetType, injectablePropertyInfo.Id);
+                if (Binds.TryGetValue(bindKey, out var bind))
+                {
+                    injectablePropertyInfo.SetValue(@object, bind);
+                }
+                else if (!injectablePropertyInfo.Optional)
+                {
+                    Debug.LogError($"Failed to inject {@object}. Not found type {injectablePropertyInfo.TargetType} with id = {injectablePropertyInfo.Id}", @object as Object);
+                }
+            }
+
             if (info.Method != null)
             {
-                info.Method.Invoke(target, null);
+                info.Method.Invoke(@object, null);
             }
         }
 
         #region IDiContainer
-
-        void IDiContainer.Inject<T>(T obj) where T : class
+        
+        public void ResetBindings()
         {
-            Inject(obj);
+            Binds.Clear();
+
+            Disposables.Clear(); 
         }
 
-        T IDiContainer.Resolve<T>() where T : class
-        {
-            var key = new BindKey(typeof(T), null);
 
-            if (Binds.TryGetValue(key, out var result))
-            {
-                return result as T;
-            }
-
-            Debug.LogError($"Nothing to resolve of type {typeof(T)}");
-
-            return default;
-        }
-
-        bool IDiContainer.TryResolve<T>(out T instance) where T : class
-        {
-            var key = new BindKey(typeof(T), null);
-
-            var exist = Binds.TryGetValue(key, out var result);
-            instance = exist ? result as T : default;
-
-            return exist;
-        }
-
-        #endregion
-
-        #region IDiInternalContainer
-
-        void IDiInternalContainer.Bind<T>(T instance, string id)
+        void IDiContainer.Bind<T>(T instance, string id)
             where T : class
         {
-            Assert.IsFalse(_isDisposed, "DiContainer already is disposed.");
+            Assert.IsFalse(_isDisposed, "DiContainer already is disposed. Maybe you need to re inject correct DiContainer");
 
-            var key = new BindKey(typeof(T), id);
-
-            Binds[key] = instance;
+            Binds[new(typeof(T), id)] = instance;
 
             if (instance is IDisposable disposable)
             {
@@ -206,13 +138,11 @@ namespace Whaledevelop.DiContainer.Internal
             }
         }
 
-        void IDiInternalContainer.Bind(Type type, object instance, string id)
+        void IDiContainer.Bind(Type type, object instance, string id)
         {
-            Assert.IsFalse(_isDisposed, "DiContainer already is disposed.");
+            Assert.IsFalse(_isDisposed, "DiContainer already is disposed. Maybe you need to re inject correct DiContainer");
 
-            var key = new BindKey(type, id);
-
-            Binds[key] = instance;
+            Binds[new(type, id)] = instance;
 
             if (instance is IDisposable disposable)
             {
@@ -220,50 +150,58 @@ namespace Whaledevelop.DiContainer.Internal
             }
         }
 
-        bool IDiInternalContainer.Unbind<T>(T instance, string id)
+        bool IDiContainer.Unbind<T>(T instance, string id)
         {
-            var key = new BindKey(typeof(T), id);
+            var bindKey = new BindKey(typeof(T), id);
 
-            if (!Binds.TryGetValue(key, out var value) || value != instance)
+            if (!Binds.TryGetValue(bindKey, out var foundInstance) || foundInstance != instance)
             {
                 return false;
             }
 
-            return Binds.Remove(key);
+            return Binds.Remove(bindKey);
         }
 
-        bool IDiInternalContainer.Unbind(Type type, object instance, string id)
+        bool IDiContainer.Unbind(Type type, object instance, string id)
         {
-            var key = new BindKey(type, id);
+            var bindKey = new BindKey(type, id);
 
-            if (!Binds.TryGetValue(key, out var value) || value != instance)
+            if (!Binds.TryGetValue(bindKey, out var foundInstance) || foundInstance != instance)
             {
                 return false;
             }
 
-            return Binds.Remove(key);
+            return Binds.Remove(bindKey);
         }
 
-        bool IDiInternalContainer.IsInjectable<T>(T obj) where T : class
+        void IDiContainer.Inject<T>(T @object)
+            where T : class
         {
-            return _injectableInfoContainer.GetInfo(obj.GetType()) != null;
+            Inject(@object);
         }
 
-        void IDiInternalContainer.InjectGameObject(GameObject gameObject)
+        bool IDiContainer.IsInjectable<T>(T @object)
+            where T : class
         {
-            var behaviours = gameObject.GetComponentsInChildren<InjectableMonoBehaviour>(true);
+            var type = @object.GetType();
+            return _injectableInfoContainer.GetInfo(type) != null;
+        }
 
-            for (int i = 0; i < behaviours.Length; i++)
+        void IDiContainer.InjectGameObject(GameObject gameObject)
+        {
+            // Для упрощения будет происходить поиск только по InjectableMonoBehaviour
+            // Для правильной реализации стоит делать поиск по MonoBehaviour с аттрибутом [Inject]
+            var injectableMonoBehaviours = gameObject.GetComponentsInChildren<InjectableMonoBehaviour>(true);
+            for (var i = 0; i < injectableMonoBehaviours.Length; i++)
             {
-                Inject(behaviours[i]);
+                Inject(injectableMonoBehaviours[i]);
             }
         }
 
-        T IDiInternalContainer.Resolve<T>(string id) where T : class
+        T IDiContainer.Resolve<T>(string id)
+            where T : class
         {
-            var key = new BindKey(typeof(T), id);
-
-            if (Binds.TryGetValue(key, out var result))
+            if (Binds.TryGetValue(new(typeof(T), id), out var result))
             {
                 return result as T;
             }
@@ -273,13 +211,11 @@ namespace Whaledevelop.DiContainer.Internal
             return default;
         }
 
-        bool IDiInternalContainer.TryResolve<T>(out T result, string id) where T : class
+        bool IDiContainer.TryResolve<T>(out T result, string id)
+            where T : class
         {
-            var key = new BindKey(typeof(T), id);
-
-            var exist = Binds.TryGetValue(key, out var value);
-            result = exist ? value as T : default;
-
+            var exist = Binds.TryGetValue(new(typeof(T), id), out var internalResult);
+            result = exist ? internalResult as T : default;
             return exist;
         }
 

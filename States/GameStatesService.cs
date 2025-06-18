@@ -18,34 +18,26 @@ namespace Whaledevelop.GameStates
         [SerializeField]
         private List<TransitionEntry> _transitionEntries = new();
 
-        private Dictionary<(IGameState from, IGameState to), IGameTransition> _transitions;
+        private Dictionary<(GameState from, GameState to), IGameTransition> _transitions;
 
-        private IDiContainer _diContainer;
+        [Inject] private IDiContainer _diContainer;
 
-        [ShowInInspector]
-        [ReadOnly]
+        [ShowInInspector, ReadOnly]
         private List<IGameState> _usedStates = new();
 
-        public ReactiveValue<IGameState> CurrentState { get; } = new();
-
-        [Inject]
-        public void Construct(IDiContainer diContainer)
-        {
-            _diContainer = diContainer;
-        }
-
+        public ReactiveValue<IGameState> CurrentState { get;  } = new();
+        
         protected override UniTask OnInitializeAsync(CancellationToken cancellationToken)
         {
-            _transitions = new Dictionary<(IGameState from, IGameState to), IGameTransition>();
+            _transitions = new();
 
             foreach (var entry in _transitionEntries)
             {
-                if (entry.From && entry.To && entry.Transition != null)
+                if (entry.From != null && entry.To != null && entry.Transition != null)
                 {
                     _transitions[(entry.From, entry.To)] = entry.Transition;
                 }
             }
-
             return UniTask.CompletedTask;
         }
 
@@ -55,46 +47,39 @@ namespace Whaledevelop.GameStates
             {
                 await state.ReleaseAsync(cancellationToken);
             }
-
             _usedStates.Clear();
         }
+
+
 
         public async UniTask ChangeStateAsync(IGameState toState, CancellationToken cancellationToken)
         {
             var fromState = CurrentState.Value;
-
-            var hasFrom = fromState != null;
-            var transition = _defaultTransition;
-
-            if (hasFrom)
-            {
-                if (_transitions.TryGetValue((fromState, toState), out var foundTransition))
-                {
-                    transition = foundTransition;
-                }
-            }
+            var noFromState = fromState == null;
+            
+            var transition = noFromState ? _defaultTransition 
+                : _transitions.GetValueOrDefault(((GameState)fromState, (GameState)toState), _defaultTransition);
 
             _diContainer.Inject(transition);
-
+            
             await transition.BeginAsync(fromState, toState, cancellationToken);
 
-            if (hasFrom)
+            if (!noFromState)
             {
-                await fromState.DisableAsync(cancellationToken);
+                await CurrentState.Value.DisableAsync(cancellationToken);
             }
 
             await SetStateAsync(toState, cancellationToken);
-
+            
             await transition.EndAsync(fromState, toState, cancellationToken);
         }
 
         private async UniTask SetStateAsync(IGameState nextState, CancellationToken cancellationToken)
         {
             CurrentState.Value = nextState;
-
-            if (!_usedStates.Contains(nextState))
+            if (!_usedStates.Contains(CurrentState.Value))
             {
-                _usedStates.Add(nextState);
+                _usedStates.Add(CurrentState.Value);
                 _diContainer.Inject(nextState);
                 await nextState.InitializeAsync(cancellationToken);
             }

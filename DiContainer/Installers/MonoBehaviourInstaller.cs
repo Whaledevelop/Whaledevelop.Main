@@ -4,7 +4,7 @@ namespace Whaledevelop.DiContainer
 {
     public abstract class MonoBehaviourInstaller : MonoBehaviour
     {
-        public IDiInternalContainer Container { get; internal set; }
+        public IDiContainer Container { get; internal set; }
 
         public abstract void InstallBindings();
     }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using Whaledevelop.DiContainer.Internal;
 
@@ -20,8 +19,7 @@ namespace Whaledevelop.DiContainer
             "mscorlib"
         };
 
-        private readonly Dictionary<string, IDiInternalContainer> _diContainers = new();
-
+        private readonly Dictionary<string, IDiContainer> _diContainers = new();
         private InjectableInfoContainer _injectableInfoContainer;
 
         internal static ProjectContext Instance
@@ -33,48 +31,41 @@ namespace Whaledevelop.DiContainer
                     return _instance;
                 }
 
-                _instance = new ProjectContext();
+                _instance = new();
                 _instance.Initialize();
-
                 return _instance;
             }
         }
 
-        internal IDiInternalContainer MainContainer { get; private set; }
+        internal IDiContainer MainContainer { get; private set; }
 
         private void Initialize()
         {
-            var filteredAssemblies = new List<Assembly>();
-            var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-            foreach (var assembly in allAssemblies)
-            {
-                var fullName = assembly.FullName;
-
-                var skip = false;
-                foreach (var prefix in PREFIX_OF_SKIPPED_ASSEMBLIES)
-                {
-                    if (fullName.StartsWith(prefix))
+            var allAssemblies = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(
+                    x =>
                     {
-                        skip = true;
-                        break;
+                        var fullName = x.FullName;
+                        for (var i = 0; i < PREFIX_OF_SKIPPED_ASSEMBLIES.Length; i++)
+                        {
+                            if (fullName.StartsWith(PREFIX_OF_SKIPPED_ASSEMBLIES[i]))
+                            {
+                                return false;
+                            }
+                        }
+                        return true;
                     }
-                }
+                )
+                .ToArray();
 
-                if (!skip)
-                {
-                    filteredAssemblies.Add(assembly);
-                }
-            }
+            _injectableInfoContainer = new();
+            _injectableInfoContainer.Initialization(allAssemblies);
 
-            _injectableInfoContainer = new InjectableInfoContainer();
-            _injectableInfoContainer.Initialization(filteredAssemblies.ToArray());
-
-            MainContainer = new Internal.DiContainer(_injectableInfoContainer, new HashSet<IDisposable>());
-            MainContainer.Bind<IDiContainer>(MainContainer);
+            MainContainer = new Internal.DiContainer(_injectableInfoContainer, new());
+            MainContainer.Bind(MainContainer, "main");
         }
 
-        internal IDiInternalContainer CreateContainer(string containerId, IDiInternalContainer baseContainer = null)
+        internal IDiContainer CreateContainer(string containerId, IDiContainer baseContainer = null)
         {
             Dictionary<BindKey, object> binds = null;
             HashSet<IDisposable> disposables;
@@ -86,12 +77,14 @@ namespace Whaledevelop.DiContainer
             }
             else
             {
-                disposables = new HashSet<IDisposable>();
+                disposables = new();
             }
 
-            if (_diContainers.Remove(containerId, out var previousContainer))
+            if (_diContainers.TryGetValue(containerId, out var previousDiContainer))
             {
-                if (previousContainer is IDisposable disposable)
+                _diContainers.Remove(containerId);
+
+                if (previousDiContainer is IDisposable disposable)
                 {
                     disposable.Dispose();
                 }
@@ -99,22 +92,20 @@ namespace Whaledevelop.DiContainer
 
             var diContainer = new Internal.DiContainer(_injectableInfoContainer, disposables, binds);
             _diContainers.Add(containerId, diContainer);
-
             return diContainer;
         }
 
-        internal IDiInternalContainer GetContainer(string containerId)
+        internal IDiContainer GetContainer(string containerId)
         {
             _diContainers.TryGetValue(containerId, out var container);
-
             return container;
         }
-
+        
         internal void DestroyAllContainers()
         {
-            foreach (var container in _diContainers.Values)
+            foreach (var kvp in _diContainers.Values.ToList())
             {
-                if (container is IDisposable disposable)
+                if (kvp is IDisposable disposable)
                 {
                     disposable.Dispose();
                 }
@@ -122,26 +113,23 @@ namespace Whaledevelop.DiContainer
 
             _diContainers.Clear();
         }
-
+        
         internal static void Reset()
         {
-            if (_instance == null)
+            if (_instance != null)
             {
-                return;
+                _instance.DestroyAllContainers();
+                _instance.MainContainer = null;
+                _instance = null;
             }
-
-            _instance.DestroyAllContainers();
-            _instance.MainContainer = null;
-            _instance = null;
         }
 
-        internal void DestroyContainer(IDiInternalContainer container)
+        internal void DestroyContainer(IDiContainer container)
         {
-            var toRemove = _diContainers.FirstOrDefault(pair => pair.Value == container);
-
-            if (!string.IsNullOrEmpty(toRemove.Key))
+            foreach (var diContainer in _diContainers.Where(currentContainer => currentContainer.Value == container))
             {
-                _diContainers.Remove(toRemove.Key);
+                _diContainers.Remove(diContainer.Key);
+                break;
             }
 
             if (container is IDisposable disposable)

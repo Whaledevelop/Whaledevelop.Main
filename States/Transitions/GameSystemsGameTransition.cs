@@ -13,13 +13,7 @@ namespace Whaledevelop.GameStates
         [SerializeField] 
         private bool _keepDuplicateSystems = true;
 
-        private IGameSystemsService _gameSystemsService;
-
-        [Inject]
-        public void Construct(IGameSystemsService  gameSystemsService)
-        {
-            _gameSystemsService = gameSystemsService;
-        }
+        [Inject] private IGameSystemsService _gameSystemsService;
         
         public async UniTask BeginAsync(IGameState fromState, IGameState toState, CancellationToken cancellationToken)
         {

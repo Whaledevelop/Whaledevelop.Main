@@ -8,7 +8,5 @@ namespace Whaledevelop.DiContainer.Internal
         public List<InjectableFieldInfo> Fields = new();
         public MethodInfo Method;
         public List<InjectablePropertyInfo> Properties = new();
-        public List<InjectableParameterInfo> ConstructParameters = new();
-        public MethodInfo ConstructMethod;
     }
 }

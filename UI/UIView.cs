@@ -1,9 +1,8 @@
-﻿using UnityEngine;
-using Whaledevelop.DiContainer;
+﻿using Whaledevelop.DiContainer;
 
 namespace Whaledevelop.UI
 {
-    public abstract class UIView : MonoBehaviour
+    public abstract class UIView : InjectableMonoBehaviour
     {
         public IUIViewModel Model;
 

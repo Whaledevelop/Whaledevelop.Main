@@ -5,22 +5,22 @@ namespace Whaledevelop.DiContainer
 {
     public static class DiContainerExtensions
     {
-        public static IDiInternalContainer CreateIfNull(this IDiInternalContainer self, string containerId, IDiInternalContainer baseContainer = null)
+        public static IDiContainer CreateIfNull(this IDiContainer self, string containerId, IDiContainer baseContainer = null)
         {
             return self ?? DiContainerUtility.CreateContainer(containerId, baseContainer);
         }
 
-        public static void Destroy(this IDiInternalContainer self)
+        public static void Destroy(this IDiContainer self)
         {
             ProjectContext.Instance.DestroyContainer(self);
         }
         
-        public static void BindToInterface<T>(this IDiInternalContainer self, T target)
+        public static void BindToInterface<T>(this IDiContainer self, T target)
         {
             self.Bind(typeof(T), target);
         }
 
-        public static void BindToAssignableInterface<T>(this IDiInternalContainer self, T target)
+        public static void BindToAssignableInterface<T>(this IDiContainer self, T target)
         {
             var type = typeof(T);
             var interfaces = target.GetType().GetInterfaces();
@@ -30,7 +30,7 @@ namespace Whaledevelop.DiContainer
             self.Bind(mainInterface, target);
         }
 
-        public static bool TryInject<T>(this IDiInternalContainer self, T @object)
+        public static bool TryInject<T>(this IDiContainer self, T @object)
             where T : class
         {
             if (!self.IsInjectable(@object))
@@ -41,14 +41,14 @@ namespace Whaledevelop.DiContainer
             return true;
         }
 
-        public static void BindAndInject<T>(this IDiInternalContainer self, T @object, string id = null)
+        public static void BindAndInject<T>(this IDiContainer self, T @object, string id = null)
             where T : class
         {
             self.Bind(@object, id);
             self.Inject(@object);
         }
 
-        public static T ResolveAndInject<T>(this IDiInternalContainer self, string id = null)
+        public static T ResolveAndInject<T>(this IDiContainer self, string id = null)
             where T : class
         {
             var instance = self.Resolve<T>(id);

@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using Whaledevelop.Services;
 
@@ -9,23 +12,18 @@ namespace Whaledevelop.GameSystems
     [CreateAssetMenu(menuName = "Whaledevelop/Services/GameSystemsService", fileName = "GameSystemsService")]
     public class GameSystemsService : Service, IGameSystemsService
     {
+        [Inject]
         private IDiContainer _diContainer;
+
+        [Inject]
         private IUpdateCallbacks _updateCallbacks;
 
         private readonly UpdateDispatcher _updatesDispatcher = new();
         private readonly List<IGameSystem> _activeGameSystems = new();
 
-        [Inject]
-        private void Construct(IDiContainer diContainer, IUpdateCallbacks updateCallbacks)
-        {
-            _diContainer = diContainer;
-            _updateCallbacks = updateCallbacks;
-        }
-
         protected override UniTask OnInitializeAsync(CancellationToken cancellationToken)
         {
             _updatesDispatcher.Initialize(_updateCallbacks);
-
             return UniTask.CompletedTask;
         }
 
@@ -33,60 +31,41 @@ namespace Whaledevelop.GameSystems
         {
             _updatesDispatcher.Dispose();
 
-            foreach (var system in _activeGameSystems)
+            var systemsToRelease = _activeGameSystems.ToArray();
+            foreach (var system in systemsToRelease)
             {
-                await system.ReleaseAsync(cancellationToken);
+                await ReleaseSystemAsync(system, cancellationToken);
             }
 
             _activeGameSystems.Clear();
         }
 
-        public async UniTask AddSystemAsync(IGameSystem gameSystem, CancellationToken cancellationToken)
+        public UniTask AddSystemAsync(IGameSystem gameSystem, CancellationToken cancellationToken)
         {
-            if (_activeGameSystems.Contains(gameSystem))
-            {
-                return;
-            }
-
-            await InitializeSystemAsync(gameSystem, cancellationToken);
+            return !_activeGameSystems.Contains(gameSystem)
+                ? InitializeSystemAsync(gameSystem, cancellationToken)
+                : UniTask.CompletedTask;
         }
 
-        public async UniTask RemoveSystemAsync(IGameSystem gameSystem, CancellationToken cancellationToken)
+        public UniTask RemoveSystemAsync(IGameSystem gameSystem, CancellationToken cancellationToken)
         {
-            if (!_activeGameSystems.Contains(gameSystem))
-            {
-                return;
-            }
-
-            await ReleaseSystemAsync(gameSystem, cancellationToken);
+            return _activeGameSystems.Contains(gameSystem)
+                ? ReleaseSystemAsync(gameSystem, cancellationToken)
+                : UniTask.CompletedTask;
         }
 
         public async UniTask UpdateSystemsAsync(IGameSystem[] gameSystems, CancellationToken cancellationToken)
         {
-            for (var i = _activeGameSystems.Count - 1; i >= 0; i--)
+            var systemsToRemove = _activeGameSystems.Except(gameSystems);
+            foreach (var system in systemsToRemove)
             {
-                var current = _activeGameSystems[i];
-                var stillUsed = false;
-                foreach (var t in gameSystems)
-                {
-                    if (t != current)
-                    {
-                        continue;
-                    }
-                    stillUsed = true;
-                    break;
-                }
-                if (!stillUsed)
-                {
-                    await ReleaseSystemAsync(current, cancellationToken);
-                }
+                await ReleaseSystemAsync(system, cancellationToken);
             }
-            foreach (var candidate in gameSystems)
+
+            var systemsToAdd = gameSystems.Except(_activeGameSystems);
+            foreach (var system in systemsToAdd)
             {
-                if (!_activeGameSystems.Contains(candidate))
-                {
-                    await InitializeSystemAsync(candidate, cancellationToken);
-                }
+                await InitializeSystemAsync(system, cancellationToken);
             }
         }
 
@@ -105,7 +84,6 @@ namespace Whaledevelop.GameSystems
             _updatesDispatcher.Unregister(gameSystem);
 
             _activeGameSystems.Remove(gameSystem);
-
             await gameSystem.ReleaseAsync(cancellationToken);
         }
     }
