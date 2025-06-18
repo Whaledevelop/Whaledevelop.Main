@@ -4,7 +4,6 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Whaledevelop.Services;
-using Whaledevelop.UI;
 
 namespace Whaledevelop.UIToolkit
 {

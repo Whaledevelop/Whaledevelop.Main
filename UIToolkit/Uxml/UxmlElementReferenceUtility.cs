@@ -15,7 +15,7 @@ namespace Whaledevelop.UIToolkit
             }
 
             sharedAsset = references[0]?.Asset;
-            if (sharedAsset == null)
+            if (!sharedAsset)
             {
                 return false;
             }

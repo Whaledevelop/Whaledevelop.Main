@@ -1,7 +1,6 @@
 ﻿using Whaledevelop.Services;
-using Whaledevelop.UIToolkit;
 
-namespace Whaledevelop.UI
+namespace Whaledevelop.UIToolkit
 {
     public interface IUIToolkitService : IService
     {

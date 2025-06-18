@@ -10,7 +10,7 @@ namespace Whaledevelop.UIToolkit
     {
         public static List<string> ExtractNames(VisualTreeAsset visualTree)
         {
-            if (visualTree == null)
+            if (!visualTree)
             {
                 return new List<string>();
             }
